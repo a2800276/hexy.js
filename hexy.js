@@ -15,11 +15,11 @@ Hexy = function (buffer, config) {
    
   switch (config.format) {
     case "none":
-    case "fours":
+    case "twos":
       self.format = config.format
       break
     default:
-      self.format = "twos"
+      self.format = "fours"
   }
   
   self.caps      = config.caps      == "upper" ? "upper" : "lower"
@@ -130,7 +130,7 @@ Hexy = function (buffer, config) {
   }
 
 }
-
+/*
 var fs = require('fs'),
     file = process.argv[2]
 
@@ -145,4 +145,6 @@ format.annotate = "none"
 format.width = 8
 console.log(hexy(data, format))
 console.log("doen")
+*/
 
+exports.hexy = hexy
