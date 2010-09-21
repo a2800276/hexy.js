@@ -19,11 +19,11 @@
 
  but it's also possible to configure:
 
- * Line numbering
- * Line width
- * Format
- * Case of hex decimals
- * Presence of the ASCII annotation in the right column.
+  * Line numbering
+  * Line width
+  * Format
+  * Case of hex decimals
+  * Presence of the ASCII annotation in the right column.
 
  This mean you can do exciting dumps like:
 
@@ -41,15 +41,45 @@
     0000020: 30 31 32 33 34 35 36 37   38 39
 
  with hexy!
-                                 
+ 
+ Formatting options are configured by passing a `format` object to the `hexy` function:
+
+    var format = {}
+        format.width = width // how many bytes per line, default 16
+        format.numbering = n // ["hex_bytes" | "none"],  default "none"
+        format.format = f    // ["fours"|"twos"|"none"], how many nibbles per group
+                             //                          default "fours"
+        format.caps = c      // ["lower"|"upper"],       default lower
+        format.annotate=a    // ["ascii"|"none"], ascii annotation at end of line?
+                             //                          default "ascii"
+        format.prefix=p      // <string> something pretty to put in front of each line
+                             //                          default ""
+        format.indent=i      // <num> number of spaces to indent
+                             //                          default 0
+
+    console.log(hexy.hexy(buffer, format))
+
+ In case you're really nerdy, you'll have noticed that the defaults correspond
+ to how `xxd` formats it's output.
+           
 
 == Installing
 
  Either use `npm`:
   
-    npm install hexy
+    npm install hexy.js
+
+ This will install the lib which you'll be able to use like so:
+    
+    var hexy = require("hexy.js"),
+        buf  = // get Buffer from somewhere,
+        str  = hexy.hexy(buf)
+
+ It will also install `hexy.js` into your path in case you're totally fed up
+ with using `xxd`.
+        
  
- or grab the source from github:
+ If you don't like `npm`, grab the source from github:
 
     http://github.com/a2800276/hexy.js
 
@@ -65,8 +95,12 @@
 
 == History
 
- This is a fairly straightforward port of `hexy.rb` which does more
- or less the same thing.
+ This is a fairly straightforward port of `hexy.rb` which does more or less the
+ same thing. You can find it here: 
+ 
+    http://github.com/a2800276/hexy
+ 
+ in case these sorts of things interest you.
 
 == Mail
 
