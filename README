@@ -6,7 +6,7 @@
 
  It should create a pleasant looking hex dumb by default:
     
-    var hexy = require('hexy.js'),
+    var hexy = require('hexy'),
            b = new Buffer("\000\001\003\005\037\012\011bcdefghijklmnopqrstuvwxyz0123456789")
     
     console.log(hexy.hexy(b))
@@ -71,7 +71,7 @@
 
  This will install the lib which you'll be able to use like so:
     
-    var hexy = require("hexy.js"),
+    var hexy = require("hexy"),
         buf  = // get Buffer from somewhere,
         str  = hexy.hexy(buf)
 
