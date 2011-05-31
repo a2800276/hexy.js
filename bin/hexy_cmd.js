@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 var hexy = require("../hexy.js"),
     fs   = require("fs")
 

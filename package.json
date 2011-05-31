@@ -8,5 +8,5 @@
     "type": "git",
     "url": "git://github.com/a2800276/hexy.js.git"
   },
-  "bin": {"hexy.js" : "./bin/hexy_cmd.js"}
+  "bin": {"hexy" : "./bin/hexy_cmd.js"}
 }
