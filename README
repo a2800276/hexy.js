@@ -67,7 +67,7 @@
 
  Either use `npm`:
   
-    npm install hexy.js
+    npm install hexy
 
  This will install the lib which you'll be able to use like so:
     
@@ -75,7 +75,7 @@
         buf  = // get Buffer from somewhere,
         str  = hexy.hexy(buf)
 
- It will also install `hexy.js` into your path in case you're totally fed up
+ It will also install `hexy` into your path in case you're totally fed up
  with using `xxd`.
         
  
