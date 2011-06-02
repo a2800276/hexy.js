@@ -92,6 +92,11 @@
  don't have to collect the whole things you want to pretty print in
  memory. `hexy` is probably most useful for debugging and getting binary
  protocol stuff working, so that's probably not an too much of an issue.
+ 
+== Thanks
+
+Thanks to Isaac Schlueter [isaacs] for gratiously lending a hand and
+cheering me up.
 
 == History
 
