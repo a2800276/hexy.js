@@ -46,7 +46,7 @@
 //
 //    var format = {}
 //        format.width = width // how many bytes per line, default 16
-//        format.numbering = n // ["hex_bytes" | "none"],  default "none"
+//        format.numbering = n // ["hex_bytes" | "none"],  default "hex_bytes"
 //        format.format = f    // ["fours"|"twos"|"none"], how many nibbles per group
 //                             //                          default "fours"
 //        format.caps = c      // ["lower"|"upper"],       default lower
@@ -71,7 +71,7 @@
 //
 // This will install the lib which you'll be able to use like so:
 //    
-//    var hexy = require("hexy.js"),
+//    var hexy = require("hexy"),
 //        buf  = // get Buffer from somewhere,
 //        str  = hexy.hexy(buf)
 //
@@ -136,7 +136,7 @@ var Hexy = function (buffer, config) {
   self.indent    = config.indent    || 0
 
   for (var i = 0; i!=self.indent; ++i) {
-    self.prefix = " "+prefix
+    self.prefix = " "+self.prefix
   }
 
   var pos = 0
@@ -161,6 +161,8 @@ var Hexy = function (buffer, config) {
       }
 
       var hex_formatted = ""
+
+
       for (var j =0; j< hex.length; j+=howMany) {
         var s = hex.substr(j, howMany)
         hex_formatted += s + " "
@@ -181,7 +183,7 @@ var Hexy = function (buffer, config) {
           padlen = self.width*3 + 2
           break
         default:
-          padlen = self * 2
+          padlen = self.width * 2 + 1
       }
 
       str += rpad(hex_formatted, padlen)

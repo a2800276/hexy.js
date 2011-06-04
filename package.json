@@ -1,6 +1,6 @@
 {
   "name" : "hexy",
-  "version" : "0.2.0",
+  "version" : "0.2.1",
   "description" : "hexdump, binary pretty-printing",
   "author" : "Tim Becker <tim.becker@kuriositaet.de>",
   "main" : "./hexy.js",
