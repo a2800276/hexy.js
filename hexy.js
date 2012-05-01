@@ -45,17 +45,18 @@
 // Formatting options are configured by passing a `format` object to the `hexy` function:
 //
 //    var format = {}
-//        format.width = width // how many bytes per line, default 16
-//        format.numbering = n // ["hex_bytes" | "none"],  default "hex_bytes"
-//        format.format = f    // ["fours"|"twos"|"none"], how many nibbles per group
-//                             //                          default "fours"
-//        format.caps = c      // ["lower"|"upper"],       default lower
-//        format.annotate=a    // ["ascii"|"none"], ascii annotation at end of line?
-//                             //                          default "ascii"
-//        format.prefix=p      // <string> something pretty to put in front of each line
-//                             //                          default ""
-//        format.indent=i      // <num> number of spaces to indent
-//                             //                          default 0
+//        format.width = width  // how many bytes per line, default 16
+//        format.numbering = n  // ["hex_bytes" | "none"],  default "hex_bytes"
+//        format.format = f     // ["fours"|"twos"|"none"], how many nibbles per group
+//                              //                          default "fours"
+//        format.caps = c       // ["lower"|"upper"],       default lower
+//        format.annotate=a     // ["ascii"|"none"], ascii annotation at end of line?
+//                              //                          default "ascii"
+//        format.prefix=p       // <string> something pretty to put in front of each line
+//                              //                          default ""
+//        format.indent=i       // <num> number of spaces to indent
+//                              //                          default 0
+//        format.html=true|false// whether to put some divs with classes and somesuch in.
 //
 //    console.log(hexy.hexy(buffer, format))
 //
@@ -92,6 +93,9 @@
 // don't have to collect the whole things you want to pretty print in
 // memory. `hexy` is probably most useful for debugging and getting binary
 // protocol stuff working, so that's probably not an too much of an issue.
+//
+// Better HTML support, e.g. I'd like to be able to mouse over the ascii
+// annotations and highlight the corresponding byte and vice versa.
 //
 //== History
 //
@@ -134,6 +138,7 @@ var Hexy = function (buffer, config) {
   self.annotate  = config.annotate  == "none"  ? "none"  : "ascii"
   self.prefix    = config.prefix    || ""
   self.indent    = config.indent    || 0
+  self.html      = config.html      || false
 
   for (var i = 0; i!=self.indent; ++i) {
     self.prefix = " "+self.prefix
@@ -144,10 +149,11 @@ var Hexy = function (buffer, config) {
   this.toString = function () {
     var str = ""
     
+    if (self.html) { str += "<div class='hexy'>\n"}
     //split up into line of max `self.width`
     var line_arr = lines()
     
-    //lines().forEach(function(hex_raw, i){
+    //lines().forEach(function(hex_raw, i)
     for (var i = 0; i!= line_arr.length; ++i) {
       var hex_raw = line_arr[i],
           hex = hex_raw[0],
@@ -166,6 +172,11 @@ var Hexy = function (buffer, config) {
       for (var j =0; j< hex.length; j+=howMany) {
         var s = hex.substr(j, howMany)
         hex_formatted += s + " "
+      }
+
+      if (self.html) {
+        odd = i%2 == 0 ? " even" : "  odd"
+        str += "<div class='"+pad(i*self.width, 8)+odd+"'>"
       }
       str += self.prefix 
 
@@ -191,8 +202,13 @@ var Hexy = function (buffer, config) {
         str+=" "
         str+=raw.replace(/[\000-\040\177-\377]/g, ".")
       }
+      if (self.html) {
+        str += "</div>\n"
+      } else {
       str += "\n"
+      } 
     }
+    if (self.html) { str += "</div>\n"}
     return str
   }
 

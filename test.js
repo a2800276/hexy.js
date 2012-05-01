@@ -51,7 +51,13 @@ var results = [
 "dingdong30 31 32 33 34 35 36 37 38 39 61 62 63 64 65 66   \n"+
 "dingdong67 68 69 6A 6B 6C 6D 6E 6F 70 71 72 73 74 75 76   \n"+
 "dingdong77 78 7A 79                                       \n"+
-""
+"",
+
+"<div class='hexy'>\n"+
+"<div class='00000000 even'>00000000: 3031 3233 3435 3637 3839 6162 6364 6566  0123456789abcdef</div>\n"+
+"<div class='00000010  odd'>00000010: 6768 696a 6b6c 6d6e 6f70 7172 7374 7576  ghijklmnopqrstuv</div>\n"+
+"<div class='00000020 even'>00000020: 7778 7a79                                wxzy</div>\n"+
+"</div>\n",
 ]
 
 var format = [
@@ -66,6 +72,7 @@ var format = [
   {prefix:"-"},
   {indent:"5"},
   {caps:"upper", numbering:"none", annotate:"none", prefix:"dingdong", format:"twos"},
+  {html:true}
 ]
 
 function check (should, is) {
