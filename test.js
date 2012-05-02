@@ -111,4 +111,11 @@ failed += check(xxd2, hexy.hexy(str2))
 ++total
 
 
+str3 = "#include<stdio.h>\n"
+xxd3 = "00000000: 2369 6e63 6c75 6465 3c73 7464 696f 2e68  #include<stdio.h\n"+
+       "00000010: 3e0a                                     >.\n"
+
+failed += check(xxd3, hexy.hexy(str3))
+++total
+
 p("failed: "+failed+" of "+total)
