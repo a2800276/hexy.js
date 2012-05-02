@@ -1,7 +1,7 @@
 var hexy = require("./hexy.js")
 
 buf = new Buffer("0123456789abcdefghijklmnopqrstuvwxzy")
-
+str = "0123456789abcdefghijklmnopqrstuvwxzy"
 
 var results = [
 "00000000: 3031 3233 3435 3637 3839 6162 6364 6566  0123456789abcdef\n"+
@@ -94,6 +94,21 @@ total = failed = 0
 for (var i = 0; i!= format.length ; ++i) {
   failed += check(results[i], hexy.hexy(buf, format[i]))
   ++total
+  failed += check(results[i], hexy.hexy(str, format[i]))
+  ++total
 }
+
+_00 = String.fromCharCode(0)
+_0000 = _00 + _00
+_08 = String.fromCharCode(8)
+_40 = "@"
+_53 = "S"
+_5100 = "Q"+_00
+str2 = _00 + _00 + _08 + _40 + _53 + _00 + _0000 + _5100 + _0000 + _5100 + _0000
+xxd2 = "00000000: 0000 0840 5300 0000 5100 0000 5100 0000  ...@S...Q...Q...\n"
+
+failed += check(xxd2, hexy.hexy(str2))
+++total
+
 
 p("failed: "+failed+" of "+total)

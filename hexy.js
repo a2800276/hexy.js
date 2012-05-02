@@ -232,7 +232,11 @@ var Hexy = function (buffer, config) {
   var hexl = function (buffer) {
     var str = ""
     for (var i=0; i!=buffer.length; ++i) {
-      str += pad(buffer[i], 2)
+      if (buffer.constructor == String) {
+        str += pad(buffer.charCodeAt(i), 2)
+      } else {
+        str += pad(buffer[i], 2)
+      }
     }
     return str
   }
