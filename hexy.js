@@ -200,7 +200,9 @@ var Hexy = function (buffer, config) {
       str += rpad(hex_formatted, padlen)
       if (self.annotate === "ascii") {
         str+=" "
-        str+=raw.replace(/[\000-\040\177-\377]/g, ".")
+        var ascii = raw.replace(/[\000-\040\177-\377]/g, ".")
+        if (self.html) {str += escape(ascii)}
+        else { str += ascii }
       }
       if (self.html) {
         str += "</div>\n"
@@ -258,6 +260,14 @@ var Hexy = function (buffer, config) {
     }
     return s
   }
+
+  var escape = function (str) {
+    str = str.split("&").join("&amp;")
+    str = str.split("<").join("&lt;")
+    str = str.split(">").join("&gt;")
+    return str
+  }
+  
 
 }
 /*

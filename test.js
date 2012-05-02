@@ -104,8 +104,8 @@ _08 = String.fromCharCode(8)
 _40 = "@"
 _53 = "S"
 _5100 = "Q"+_00
-str2 = _00 + _00 + _08 + _40 + _53 + _00 + _0000 + _5100 + _0000 + _5100 + _0000
-xxd2 = "00000000: 0000 0840 5300 0000 5100 0000 5100 0000  ...@S...Q...Q...\n"
+var str2 = _00 + _00 + _08 + _40 + _53 + _00 + _0000 + _5100 + _0000 + _5100 + _0000
+var xxd2 = "00000000: 0000 0840 5300 0000 5100 0000 5100 0000  ...@S...Q...Q...\n"
 
 failed += check(xxd2, hexy.hexy(str2))
 ++total
@@ -116,6 +116,14 @@ xxd3 = "00000000: 2369 6e63 6c75 6465 3c73 7464 696f 2e68  #include<stdio.h\n"+
        "00000010: 3e0a                                     >.\n"
 
 failed += check(xxd3, hexy.hexy(str3))
+++total
+
+xxd4 = "<div class='hexy'>\n"+
+       "<div class='00000000 even'>00000000: 2369 6e63 6c75 6465 3c73 7464 696f 2e68  #include&lt;stdio.h</div>\n"+
+       "<div class='00000010  odd'>00000010: 3e0a                                     &gt;.</div>\n"+
+       "</div>\n"
+
+failed += check(xxd4, hexy.hexy(str3, {html:true}))
 ++total
 
 p("failed: "+failed+" of "+total)
