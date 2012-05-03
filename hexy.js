@@ -2,30 +2,30 @@
 //
 // `hexy` is a javascript (node) library that's easy to use to create hex
 // dumps from within node. It contains a number of options to configure
-// how the hex dumb will end up looking.
+// how the hex dump will end up looking.
 //
 // It should create a pleasant looking hex dumb by default:
 //    
-//    var hexy = require('hexy.js'),
+//    var hexy = require('hexy'),
 //           b = new Buffer("\000\001\003\005\037\012\011bcdefghijklmnopqrstuvwxyz0123456789")
 //    
 //    console.log(hexy.hexy(b))
 //
 // results in this dump:
 //
-//    0000000: 00 01 03 05 1f 0a 09 62   63 64 65 66 67 68 69 6a  .......b cdefghij 
-//    0000010: 6b 6c 6d 6e 6f 70 71 72   73 74 75 76 77 78 79 7a  klmnopqr stuvwxyz 
-//    0000020: 30 31 32 33 34 35 36 37   38 39                    01234567 89
+//    00000000: 0001 0305 1f0a 0962 6364 6566 6768 696a  .......bcdefghij
+//    00000010: 6b6c 6d6e 6f70 7172 7374 7576 7778 797a  klmnopqrstuvwxyz
+//    00000020: 3031 3233 3435 3637 3839                 0123456789
 //
 // but it's also possible to configure:
 //
 //  * Line numbering
 //  * Line width
-//  * Format
+//  * Format of byte grouping
 //  * Case of hex decimals
 //  * Presence of the ASCII annotation in the right column.
 //
-// This mean you can do exciting dumps like:
+// This mean it's easy to generate exciting dumps like:
 //
 //    0000000: 0001 0305 1f0a 0962  .... ...b 
 //    0000008: 6364 6566 6768 696a  cdef ghij 
@@ -45,18 +45,19 @@
 // Formatting options are configured by passing a `format` object to the `hexy` function:
 //
 //    var format = {}
-//        format.width = width  // how many bytes per line, default 16
-//        format.numbering = n  // ["hex_bytes" | "none"],  default "hex_bytes"
-//        format.format = f     // ["fours"|"twos"|"none"], how many nibbles per group
-//                              //                          default "fours"
-//        format.caps = c       // ["lower"|"upper"],       default lower
-//        format.annotate=a     // ["ascii"|"none"], ascii annotation at end of line?
-//                              //                          default "ascii"
-//        format.prefix=p       // <string> something pretty to put in front of each line
-//                              //                          default ""
-//        format.indent=i       // <num> number of spaces to indent
-//                              //                          default 0
-//        format.html=true|false// whether to put some divs with classes and somesuch in.
+//        format.width = width // how many bytes per line, default 16
+//        format.numbering = n // ["hex_bytes" | "none"],  default "hex_bytes"
+//        format.format = f    // ["fours"|"twos"|"none"], how many nibbles per group
+//                             //                          default "fours"
+//        format.caps = c      // ["lower"|"upper"],       default lower
+//        format.annotate=a    // ["ascii"|"none"], ascii annotation at end of line?
+//                             //                          default "ascii"
+//        format.prefix=p      // <string> something pretty to put in front of each line
+//                             //                          default ""
+//        format.indent=i      // <num> number of spaces to indent
+//                             //                          default 0
+//        format.html=true     // funky html divs 'n stuff! experimental.
+//                             //                          default: false
 //
 //    console.log(hexy.hexy(buffer, format))
 //
@@ -76,7 +77,7 @@
 //        buf  = // get Buffer from somewhere,
 //        str  = hexy.hexy(buf)
 //
-// It will also install `hexy.js` into your path in case you're totally fed up
+// It will also install `hexy` into your path in case you're totally fed up
 // with using `xxd`.
 //        
 // 
@@ -86,16 +87,22 @@
 //
 //== TODOS
 //
-// The current version only pretty prints Buffers. Which probably means it
-// can only be used from within node. What's more important what it
-// doesn't support: Strings (which would be nice for the sake of
-// completeness) and Streams/series of Buffers which would be nice so you
-// don't have to collect the whole things you want to pretty print in
-// memory. `hexy` is probably most useful for debugging and getting binary
-// protocol stuff working, so that's probably not an too much of an issue.
+// The current version only pretty prints node Buffer and JS Strings. This
+// should be expanded to also do typed arrays, Streams/series of Buffers
+// which would be nice so you don't have to collect the whole things you
+// want to pretty print in memory, and such.
 //
-// Better HTML support, e.g. I'd like to be able to mouse over the ascii
-// annotations and highlight the corresponding byte and vice versa.
+// I'd like to improve html rendering, e.g. to be able to mouse over the
+// ascii annotation and highlight the hex byte and vice versa, improve
+// browser integration and set up a proper build & packaging system.
+//
+// 
+//== Thanks
+//
+//* Thanks to Isaac Schlueter [isaacs] for gratiously lending a hand and
+//cheering me up.
+//* dodo (http://coderwall.com/dodo)
+//
 //
 //== History
 //
@@ -111,6 +118,8 @@
 // In case you discover bugs, spelling errors, offer suggestions for
 // improvements or would like to help out with the project, you can contact
 // me directly (tim@kuriositaet.de). 
+
+
 var hexy = function (buffer, config) {
   config = config || {}
   var h = new Hexy(buffer, config)
@@ -262,13 +271,6 @@ var Hexy = function (buffer, config) {
       }
     
     }
-//    while(s.length < len) {
-//      if (self.html) {
-//        s += "&nbsp;"
-//      } else {
-//        s += " "
-//      }
-//    }
     return s
   }
 
@@ -281,21 +283,5 @@ var Hexy = function (buffer, config) {
   
 
 }
-/*
-var fs = require('fs'),
-    file = process.argv[2]
-
-
-var data = fs.readFileSync(file)
-//console.log(hexy(data))
-var format = {}
-//format.format = "fours"
-format.caps   = "upper"
-format.annotate = "none"
-//format.numbering = "none"
-format.width = 8
-console.log(hexy(data, format))
-console.log("doen")
-*/
 
 exports.hexy = hexy

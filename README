@@ -2,7 +2,7 @@
 
  `hexy` is a javascript (node) library that's easy to use to create hex
  dumps from within node. It contains a number of options to configure
- how the hex dumb will end up looking.
+ how the hex dump will end up looking.
 
  It should create a pleasant looking hex dumb by default:
     
@@ -13,19 +13,19 @@
 
  results in this dump:
 
-    0000000: 00 01 03 05 1f 0a 09 62   63 64 65 66 67 68 69 6a  .......b cdefghij 
-    0000010: 6b 6c 6d 6e 6f 70 71 72   73 74 75 76 77 78 79 7a  klmnopqr stuvwxyz 
-    0000020: 30 31 32 33 34 35 36 37   38 39                    01234567 89
+    00000000: 0001 0305 1f0a 0962 6364 6566 6768 696a  .......bcdefghij
+    00000010: 6b6c 6d6e 6f70 7172 7374 7576 7778 797a  klmnopqrstuvwxyz
+    00000020: 3031 3233 3435 3637 3839                 0123456789
 
  but it's also possible to configure:
 
   * Line numbering
   * Line width
-  * Format
+  * Format of byte grouping
   * Case of hex decimals
   * Presence of the ASCII annotation in the right column.
 
- This mean you can do exciting dumps like:
+ This mean it's easy to generate exciting dumps like:
 
     0000000: 0001 0305 1f0a 0962  .... ...b 
     0000008: 6364 6566 6768 696a  cdef ghij 
@@ -56,6 +56,8 @@
                              //                          default ""
         format.indent=i      // <num> number of spaces to indent
                              //                          default 0
+        format.html=true     // funky html divs 'n stuff! experimental.
+                             //                          default: false
 
     console.log(hexy.hexy(buffer, format))
 
@@ -85,13 +87,15 @@
 
 == TODOS
 
- The current version only pretty prints Buffers. Which probably means it
- can only be used from within node. What's more important what it
- doesn't support: Strings (which would be nice for the sake of
- completeness) and Streams/series of Buffers which would be nice so you
- don't have to collect the whole things you want to pretty print in
- memory. `hexy` is probably most useful for debugging and getting binary
- protocol stuff working, so that's probably not an too much of an issue.
+ The current version only pretty prints node Buffer and JS Strings. This
+ should be expanded to also do typed arrays, Streams/series of Buffers
+ which would be nice so you don't have to collect the whole things you
+ want to pretty print in memory, and such.
+
+ I'd like to improve html rendering, e.g. to be able to mouse over the
+ ascii annotation and highlight the hex byte and vice versa, improve
+ browser integration and set up a proper build & packaging system.
+
  
 == Thanks
 
