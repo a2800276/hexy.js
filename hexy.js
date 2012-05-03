@@ -111,7 +111,6 @@
 // In case you discover bugs, spelling errors, offer suggestions for
 // improvements or would like to help out with the project, you can contact
 // me directly (tim@kuriositaet.de). 
-
 var hexy = function (buffer, config) {
   config = config || {}
   var h = new Hexy(buffer, config)
@@ -255,9 +254,21 @@ var Hexy = function (buffer, config) {
     return s
   } 
   var rpad = function(s, len) {
-    while(s.length < len) {
-      s += " "
+    for (var n = len - s.length; n!=0; --n) {
+      if (self.html) {
+        s += "&nbsp;"
+      } else {
+        s += " "
+      }
+    
     }
+//    while(s.length < len) {
+//      if (self.html) {
+//        s += "&nbsp;"
+//      } else {
+//        s += " "
+//      }
+//    }
     return s
   }
 
