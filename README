@@ -1,8 +1,8 @@
 = hexy.js -- utility to create hex dumps 
 
- `hexy` is a javascript (node) library that's easy to use to create hex
- dumps from within node. It contains a number of options to configure
- how the hex dump will end up looking.
+ `hexy` is a javascript library that's easy to use to create hex dumps. It
+ works well in node and has cursory browser (more below) support. It contains a
+ number of options to configure how the hex dump will end up looking.
 
  It should create a pleasant looking hex dumb by default:
     
@@ -84,6 +84,23 @@
  If you don't like `npm`, grab the source from github:
 
     http://github.com/a2800276/hexy.js
+
+== Browser Support
+
+Basically eveything should work fine in the browser as well, just
+include hexy.js in a script tag, and you'll get `hexy` and `Hexy` stuck
+to the global object (window).
+
+Some caveats: "Works fine on my system™". Browser support is 'new' and
+not thoroughly tested (... eh, only on chrome [Version: whatever I'm
+currently running]). Under node, I can generally assume that binary data
+is passed in in a sane fashion using buffers, but plain old Javascript
+doesn't really have any datatypes that can handle bytes gracefully.
+Currently only Strings are supported, I'd like to add numeric and typed
+arrays.
+
+Let me know in case you run into any issues, I'd be happy to find out
+about them.
 
 == TODOS
 

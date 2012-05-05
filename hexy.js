@@ -120,6 +120,8 @@
 // me directly (tim@kuriositaet.de). 
 
 
+(function (arg) {
+
 var hexy = function (buffer, config) {
   config = config || {}
   var h = new Hexy(buffer, config)
@@ -180,7 +182,7 @@ var Hexy = function (buffer, config) {
       for (var j =0; j< hex.length; j+=howMany) {
         var s = hex.substr(j, howMany)
         hex_formatted += s + " "
-      }
+      } 
 
       if (self.html) {
         odd = i%2 == 0 ? " even" : "  odd"
@@ -284,4 +286,24 @@ var Hexy = function (buffer, config) {
 
 }
 
-exports.hexy = hexy
+
+// This is probably not the prettiest or coolest way to to determine runtime
+// environment. It seems to work and Im not up to the task figuring out what
+// the module system du jour is and how to interface with it ...
+
+// If anyone wants to fix this to include this module "properly", I'm more than
+// happy to incorporate any fixes...
+
+var _exp
+if (typeof exports !== "undefined") {
+  _exp = exports
+} else if (arg === window) {
+  _exp = window
+} else {
+  // who knows?
+  _exp = arg // or this or somethings. ...
+}
+_exp.hexy = hexy
+_exp.Hexy = Hexy
+
+})(this)
