@@ -127,3 +127,7 @@ failed += check(xxd4, hexy.hexy(str3, {html:true}))
 ++total
 
 p("failed: "+failed+" of "+total)
+
+if (failed != 0) {
+  process.exit(1)
+}
