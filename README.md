@@ -1,5 +1,5 @@
 [![build status](https://secure.travis-ci.org/a2800276/hexy.js.png)](http://travis-ci.org/a2800276/hexy.js)
-= hexy.js -- utility to create hex dumps 
+# hexy.js -- utility to create hex dumps 
 
  `hexy` is a javascript library that's easy to use to create hex dumps. It
  works well in node and has cursory browser (more below) support. It contains a
@@ -66,7 +66,7 @@
  to how `xxd` formats it's output.
            
 
-== Installing
+## Installing
 
  Either use `npm`:
   
@@ -86,7 +86,7 @@
 
     http://github.com/a2800276/hexy.js
 
-== Browser Support
+## Browser Support
 
 Basically eveything should work fine in the browser as well, just
 include hexy.js in a script tag, and you'll get `hexy` and `Hexy` stuck
@@ -103,7 +103,7 @@ arrays.
 Let me know in case you run into any issues, I'd be happy to find out
 about them.
 
-== TODOS
+## TODOS
 
  The current version only pretty prints node Buffer and JS Strings. This
  should be expanded to also do typed arrays, Streams/series of Buffers
@@ -115,14 +115,14 @@ about them.
  browser integration and set up a proper build & packaging system.
 
  
-== Thanks
+## Thanks
 
 * Thanks to Isaac Schlueter [isaacs] for gratiously lending a hand and
 cheering me up.
 * dodo (http://coderwall.com/dodo)
+* the fine folks at [Travis](http://travis-ci.org/a2800276/hexy.js)
 
-
-== History
+## History
 
  This is a fairly straightforward port of `hexy.rb` which does more or less the
  same thing. You can find it here: 
@@ -131,7 +131,7 @@ cheering me up.
  
  in case these sorts of things interest you.
 
-== Mail
+## Mail
 
  In case you discover bugs, spelling errors, offer suggestions for
  improvements or would like to help out with the project, you can contact
