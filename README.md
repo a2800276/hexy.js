@@ -1,24 +1,24 @@
 [![build status](https://secure.travis-ci.org/a2800276/hexy.js.png)](http://travis-ci.org/a2800276/hexy.js)
 # hexy.js -- utility to create hex dumps 
 
- `hexy` is a javascript library that's easy to use to create hex dumps. It
- works well in node and has cursory browser (more below) support. It contains a
- number of options to configure how the hex dump will end up looking.
+`hexy` is a javascript library that's easy to use to create hex dumps. It
+works well in node and has cursory browser (more below) support. It contains a
+number of options to configure how the hex dump will end up looking.
 
- It should create a pleasant looking hex dumb by default:
+It should create a pleasant looking hex dumb by default:
     
     var hexy = require('hexy'),
            b = new Buffer("\000\001\003\005\037\012\011bcdefghijklmnopqrstuvwxyz0123456789")
     
     console.log(hexy.hexy(b))
 
- results in this dump:
+results in this dump:
 
     00000000: 0001 0305 1f0a 0962 6364 6566 6768 696a  .......bcdefghij
     00000010: 6b6c 6d6e 6f70 7172 7374 7576 7778 797a  klmnopqrstuvwxyz
     00000020: 3031 3233 3435 3637 3839                 0123456789
 
- but it's also possible to configure:
+but it's also possible to configure:
 
   * Line numbering
   * Line width
@@ -26,7 +26,7 @@
   * Case of hex decimals
   * Presence of the ASCII annotation in the right column.
 
- This mean it's easy to generate exciting dumps like:
+This mean it's easy to generate exciting dumps like:
 
     0000000: 0001 0305 1f0a 0962  .... ...b 
     0000008: 6364 6566 6768 696a  cdef ghij 
@@ -35,15 +35,15 @@
     0000020: 3031 3233 3435 3637  0123 4567 
     0000028: 3839                 89
 
- or even:
+or even:
 
     0000000: 00 01 03 05 1f 0a 09 62   63 64 65 66 67 68 69 6a 
     0000010: 6b 6c 6d 6e 6f 70 71 72   73 74 75 76 77 78 79 7a 
     0000020: 30 31 32 33 34 35 36 37   38 39
 
- with hexy!
+with hexy!
  
- Formatting options are configured by passing a `format` object to the `hexy` function:
+Formatting options are configured by passing a `format` object to the `hexy` function:
 
     var format = {}
         format.width = width // how many bytes per line, default 16
@@ -62,27 +62,27 @@
 
     console.log(hexy.hexy(buffer, format))
 
- In case you're really nerdy, you'll have noticed that the defaults correspond
- to how `xxd` formats it's output.
+In case you're really nerdy, you'll have noticed that the defaults correspond
+to how `xxd` formats it's output.
            
 
 ## Installing
 
- Either use `npm`:
+Either use `npm`:
   
     npm install hexy
 
- This will install the lib which you'll be able to use like so:
+This will install the lib which you'll be able to use like so:
     
     var hexy = require("hexy"),
         buf  = // get Buffer from somewhere,
         str  = hexy.hexy(buf)
 
- It will also install `hexy` into your path in case you're totally fed up
- with using `xxd`.
+It will also install `hexy` into your path in case you're totally fed up
+with using `xxd`.
         
  
- If you don't like `npm`, grab the source from github:
+If you don't like `npm`, grab the source from github:
 
     http://github.com/a2800276/hexy.js
 
@@ -105,14 +105,14 @@ about them.
 
 ## TODOS
 
- The current version only pretty prints node Buffer and JS Strings. This
- should be expanded to also do typed arrays, Streams/series of Buffers
- which would be nice so you don't have to collect the whole things you
- want to pretty print in memory, and such.
+The current version only pretty prints node Buffer and JS Strings. This
+should be expanded to also do typed arrays, Streams/series of Buffers
+which would be nice so you don't have to collect the whole things you
+want to pretty print in memory, and such.
 
- I'd like to improve html rendering, e.g. to be able to mouse over the
- ascii annotation and highlight the hex byte and vice versa, improve
- browser integration and set up a proper build & packaging system.
+I'd like to improve html rendering, e.g. to be able to mouse over the
+ascii annotation and highlight the hex byte and vice versa, improve
+browser integration and set up a proper build & packaging system.
 
  
 ## Thanks
@@ -124,15 +124,15 @@ cheering me up.
 
 ## History
 
- This is a fairly straightforward port of `hexy.rb` which does more or less the
- same thing. You can find it here: 
+This is a fairly straightforward port of `hexy.rb` which does more or less the
+same thing. You can find it here: 
  
     http://github.com/a2800276/hexy
  
- in case these sorts of things interest you.
+in case these sorts of things interest you.
 
 ## Mail
 
- In case you discover bugs, spelling errors, offer suggestions for
- improvements or would like to help out with the project, you can contact
- me directly (tim@kuriositaet.de). 
+In case you discover bugs, spelling errors, offer suggestions for
+improvements or would like to help out with the project, you can contact
+me directly (tim@kuriositaet.de). 
