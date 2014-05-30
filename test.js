@@ -91,8 +91,8 @@ var format = [
   {offset:10},
   {offset:10, length:10},
   {offset:10, length:10, html:true},
-  {addr_offset: 10},
-  {addr_offset: 10, offset:10, length:10},
+  {display_offset: 10},
+  {display_offset: 10, offset:10, length:10},
 ]
 
 function check (should, is) {

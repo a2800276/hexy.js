@@ -45,23 +45,23 @@
 // Formatting options are configured by passing a `format` object to the `hexy` function:
 //
 //    var format = {}
-//        format.width = width // how many bytes per line, default 16
-//        format.numbering = n // ["hex_bytes" | "none"],  default "hex_bytes"
-//        format.format = f    // ["fours"|"twos"|"none"], how many nibbles per group
-//                             //                          default "fours"
-//        format.caps = c      // ["lower"|"upper"],       default lower
-//        format.annotate=a    // ["ascii"|"none"], ascii annotation at end of line?
-//                             //                          default "ascii"
-//        format.prefix=p      // <string> something pretty to put in front of each line
-//                             //                          default ""
-//        format.indent=i      // <num> number of spaces to indent
-//                             //                          default 0
-//        format.offset        // offset into the buffer to start
-//        format.length        // number of bytes to display
-//        format.addr_offset   // modifiy the starting address by the indicated
-//                             // number of bytes
-//        format.html=true     // funky html divs 'n stuff! experimental.
-//                             //                          default: false
+//        format.width = width  // how many bytes per line, default 16
+//        format.numbering = n  // ["hex_bytes" | "none"],  default "hex_bytes"
+//        format.format = f     // ["fours"|"twos"|"none"], how many nibbles per group
+//                              //                          default "fours"
+//        format.caps = c       // ["lower"|"upper"],       default lower
+//        format.annotate=a     // ["ascii"|"none"], ascii annotation at end of line?
+//                              //                          default "ascii"
+//        format.prefix=p       // <string> something pretty to put in front of each line
+//                              //                          default ""
+//        format.indent=i       // <num> number of spaces to indent
+//                              //                          default 0
+//        format.offset         // offset into the buffer to start
+//        format.length         // number of bytes to display
+//        format.display_offset // modifiy the starting address by the indicated
+//                              // number of bytes
+//        format.html=true      // funky html divs 'n stuff! experimental.
+//                              //                          default: false
 //
 //    console.log(hexy.hexy(buffer, format))
 //
@@ -155,7 +155,8 @@ var Hexy = function (buffer, config) {
   self.html        = config.html        || false
   self.offset      = config.offset      || 0
   self.length      = config.length      || -1
-  self.addr_offset = config.addr_offset || 0
+  
+  self.display_offset = config.display_offset || 0
 
   if (self.offset) {
     if (self.offset < self.buffer.length) {
@@ -203,7 +204,7 @@ var Hexy = function (buffer, config) {
         hex_formatted += s + " "
       } 
 
-      var addr = (i*self.width)+self.offset+self.addr_offset;
+      var addr = (i*self.width)+self.offset+self.display_offset;
       if (self.html) {
         odd = i%2 == 0 ? " even" : "  odd"
         str += "<div class='"+pad(addr, 8)+odd+"'>"
