@@ -248,7 +248,7 @@ var Hexy = function (buffer, config) {
     var hex_raw = []
     for (var i = 0; i<self.buffer.length ; i+=self.width) {
       var begin = i,
-          end   = i+self.width >= buffer.length ? buffer.length : i+self.width,
+          end   = i+self.width >= self.buffer.length ? self.buffer.length : i+self.width,
           slice = self.buffer.slice(begin, end),
           hex   = self.caps === "upper" ? hexu(slice) : hexl(slice),
           raw   = slice.toString('ascii')
