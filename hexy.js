@@ -133,7 +133,7 @@ var Hexy = function (buffer, config) {
  
   self.buffer    = buffer // magic string conversion here?
   self.width     = config.width || 16
-  self.offset    = config.offset || 0
+  self.offset    = config.offset || 0 // hexdump starting at this offset
   self.numbering = config.numbering == "none"  ? "none" : "hex_bytes"
    
   switch (config.format) {
