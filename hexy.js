@@ -133,6 +133,7 @@ var Hexy = function (buffer, config) {
  
   self.buffer    = buffer // magic string conversion here?
   self.width     = config.width || 16
+  self.offset    = config.offset || 0
   self.numbering = config.numbering == "none"  ? "none" : "hex_bytes"
    
   switch (config.format) {
@@ -184,14 +185,15 @@ var Hexy = function (buffer, config) {
         hex_formatted += s + " "
       } 
 
+      var addr = (i*self.width)+self.offset;
       if (self.html) {
         odd = i%2 == 0 ? " even" : "  odd"
-        str += "<div class='"+pad(i*self.width, 8)+odd+"'>"
+        str += "<div class='"+pad(addr, 8)+odd+"'>"
       }
       str += self.prefix 
 
       if (self.numbering === "hex_bytes") {
-        str += pad(i*self.width, 8) // padding...
+        str += pad(addr, 8) // padding...
         str += ": "
       }
       
