@@ -121,6 +121,7 @@ browser integration and set up a proper build & packaging system.
 cheering me up.
 * dodo (http://coderwall.com/dodo)
 * the fine folks at [Travis](http://travis-ci.org/a2800276/hexy.js)
+* radare (https://github.com/radare)
 
 ## History
 
