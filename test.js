@@ -8,6 +8,10 @@ var results = [
 "00000010: 6768 696a 6b6c 6d6e 6f70 7172 7374 7576  ghijklmnopqrstuv\n"+
 "00000020: 7778 7a79                                wxzy\n",
 
+"00010000: 3031 3233 3435 3637 3839 6162 6364 6566  0123456789abcdef\n"+
+"00010010: 6768 696a 6b6c 6d6e 6f70 7172 7374 7576  ghijklmnopqrstuv\n"+
+"00010020: 7778 7a79                                wxzy\n",
+
 "00000000: 3031 3233 3435 3637 3839 6162 6364 6566  0123456789abcdef\n"+
 "00000010: 6768 696A 6B6C 6D6E 6F70 7172 7374 7576  ghijklmnopqrstuv\n"+
 "00000020: 7778 7A79                                wxzy\n",
@@ -62,6 +66,7 @@ var results = [
 
 var format = [
   {},
+  {offset:0x10000},
   {caps:"upper"},
   {width:8},
   {width:8, caps:"upper"},
