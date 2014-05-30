@@ -56,6 +56,10 @@
 //                             //                          default ""
 //        format.indent=i      // <num> number of spaces to indent
 //                             //                          default 0
+//        format.offset        // offset into the buffer to start
+//        format.length        // number of bytes to display
+//        format.addr_offset   // modifiy the starting address by the indicated
+//                             // number of bytes
 //        format.html=true     // funky html divs 'n stuff! experimental.
 //                             //                          default: false
 //
@@ -144,11 +148,26 @@ var Hexy = function (buffer, config) {
       self.format = "fours"
   }
   
-  self.caps      = config.caps      == "upper" ? "upper" : "lower"
-  self.annotate  = config.annotate  == "none"  ? "none"  : "ascii"
-  self.prefix    = config.prefix    || ""
-  self.indent    = config.indent    || 0
-  self.html      = config.html      || false
+  self.caps        = config.caps        == "upper" ? "upper" : "lower"
+  self.annotate    = config.annotate    == "none"  ? "none"  : "ascii"
+  self.prefix      = config.prefix      || ""
+  self.indent      = config.indent      || 0
+  self.html        = config.html        || false
+  self.offset      = config.offset      || 0
+  self.length      = config.length      || -1
+  self.addr_offset = config.addr_offset || 0
+
+  if (self.offset) {
+    if (self.offset < self.buffer.length) {
+      self.buffer = self.buffer.slice(self.offset)
+    }
+  }
+
+  if (self.length !== -1) {
+    if (self.length <= self.buffer.length) {
+      self.buffer = self.buffer.slice(0,self.length)
+    }
+  }
 
   for (var i = 0; i!=self.indent; ++i) {
     self.prefix = " "+self.prefix
@@ -184,14 +203,15 @@ var Hexy = function (buffer, config) {
         hex_formatted += s + " "
       } 
 
+      var addr = (i*self.width)+self.offset+self.addr_offset;
       if (self.html) {
         odd = i%2 == 0 ? " even" : "  odd"
-        str += "<div class='"+pad(i*self.width, 8)+odd+"'>"
+        str += "<div class='"+pad(addr, 8)+odd+"'>"
       }
       str += self.prefix 
 
       if (self.numbering === "hex_bytes") {
-        str += pad(i*self.width, 8) // padding...
+        str += pad(addr, 8) // padding...
         str += ": "
       }
       
@@ -226,12 +246,10 @@ var Hexy = function (buffer, config) {
 
   var lines = function() {
     var hex_raw = []
-    
-
     for (var i = 0; i<self.buffer.length ; i+=self.width) {
       var begin = i,
           end   = i+self.width >= buffer.length ? buffer.length : i+self.width,
-          slice = buffer.slice(begin, end),
+          slice = self.buffer.slice(begin, end),
           hex   = self.caps === "upper" ? hexu(slice) : hexl(slice),
           raw   = slice.toString('ascii')
 

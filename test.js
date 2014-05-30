@@ -58,6 +58,21 @@ var results = [
 "<div class='00000010  odd'>00000010: 6768 696a 6b6c 6d6e 6f70 7172 7374 7576  ghijklmnopqrstuv</div>\n"+
 "<div class='00000020 even'>00000020: 7778 7a79 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; wxzy</div>\n"+
 "</div>\n",
+
+"0000000a: 6162 6364 6566 6768 696a 6b6c 6d6e 6f70  abcdefghijklmnop\n"+
+"0000001a: 7172 7374 7576 7778 7a79                 qrstuvwxzy\n",
+
+"0000000a: 6162 6364 6566 6768 696a                 abcdefghij\n",
+
+"<div class='hexy'>\n"+
+"<div class='0000000a even'>0000000a: 6162 6364 6566 6768 696a &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; abcdefghij</div>\n"+
+"</div>\n",
+
+"0000000a: 3031 3233 3435 3637 3839 6162 6364 6566  0123456789abcdef\n"+
+"0000001a: 6768 696a 6b6c 6d6e 6f70 7172 7374 7576  ghijklmnopqrstuv\n"+
+"0000002a: 7778 7a79                                wxzy\n",
+
+"00000014: 6162 6364 6566 6768 696a                 abcdefghij\n",
 ]
 
 var format = [
@@ -72,7 +87,12 @@ var format = [
   {prefix:"-"},
   {indent:"5"},
   {caps:"upper", numbering:"none", annotate:"none", prefix:"dingdong", format:"twos"},
-  {html:true}
+  {html:true},
+  {offset:10},
+  {offset:10, length:10},
+  {offset:10, length:10, html:true},
+  {addr_offset: 10},
+  {addr_offset: 10, offset:10, length:10},
 ]
 
 function check (should, is) {
