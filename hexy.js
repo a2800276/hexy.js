@@ -127,13 +127,15 @@
 (function (arg) {
 
 var hexy = function (buffer, config) {
-  config = config || {}
   var h = new Hexy(buffer, config)
   return h.toString()
 }
 
 var Hexy = function (buffer, config) {
   var self = this
+
+  buffer = (Buffer.isBuffer(buffer) && buffer) || (typeof buffer === 'string' && new Buffer(buffer)) || new Buffer(0)
+  config = config || {}
  
   self.buffer    = buffer // magic string conversion here?
   self.width     = config.width || 16
