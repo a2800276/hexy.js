@@ -146,8 +146,16 @@ xxd4 = "<div class='hexy'>\n"+
 failed += check(xxd4, hexy.hexy(str3, {html:true}))
 ++total
 
+// empty string/buffer/nil etc should return empty string, as does xxd
+var empties = ["", undefined, null]
+empties.forEach( function (empty) {
+  failed += check("", hexy.hexy(empty))
+})
+
 p("failed: "+failed+" of "+total)
 
 if (failed != 0) {
   process.exit(1)
 }
+
+
