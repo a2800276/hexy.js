@@ -3,6 +3,7 @@
   "version" : "0.2.7",
   "description" : "hexdump, binary pretty-printing",
   "author" : "Tim Becker <tim.becker@kuriositaet.de>",
+  "license": "MIT",
   "main" : "./hexy.js",
   "repository": {
     "type": "git",
