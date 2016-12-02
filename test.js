@@ -1,7 +1,10 @@
 var hexy = require("./hexy.js")
 
-buf = new Buffer("0123456789abcdefghijklmnopqrstuvwxzy")
-str = "0123456789abcdefghijklmnopqrstuvwxzy"
+var buf = new Buffer("0123456789abcdefghijklmnopqrstuvwxzy")
+var str = "0123456789abcdefghijklmnopqrstuvwxzy"
+var nums = [ 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 97, 98, 99, 100, 
+  101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114,
+  115, 116, 117, 118, 119, 120, 122, 121 ]
 
 var results = [
 "00000000: 3031 3233 3435 3637 3839 6162 6364 6566  0123456789abcdef\n"+
@@ -116,6 +119,8 @@ for (var i = 0; i!= format.length ; ++i) {
   ++total
   failed += check(results[i], hexy.hexy(str, format[i]))
   ++total
+  failed += check(results[i], hexy.hexy(nums, format[i]))
+  ++total
 }
 
 _00 = String.fromCharCode(0)
@@ -150,7 +155,15 @@ failed += check(xxd4, hexy.hexy(str3, {html:true}))
 var empties = ["", undefined, null]
 empties.forEach( function (empty) {
   failed += check("", hexy.hexy(empty))
+  ++total
 })
+
+// Number arrays with bytes work, arrays containing values larger that 
+// 0xff are truncated ( val & 0xff )
+var arr = [0x1001, 0x2002, 0x3003, 0xf00f]
+var arr_e = "00000000: 0102 030f                                ....\n"
+failed += check(arr_e, hexy.hexy(arr))
+++total
 
 p("failed: "+failed+" of "+total)
 

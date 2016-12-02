@@ -9,6 +9,7 @@ It should create a pleasant looking hex dumb by default:
     
     var hexy = require('hexy'),
            b = new Buffer("\000\001\003\005\037\012\011bcdefghijklmnopqrstuvwxyz0123456789")
+            // or String or Array containing numbers ( bytes, i.e. < 0xFF )
     
     console.log(hexy.hexy(b))
 
@@ -26,7 +27,7 @@ but it's also possible to configure:
   * Case of hex decimals
   * Presence of the ASCII annotation in the right column.
 
-This mean it's easy to generate exciting dumps like:
+This means it's easy to generate exciting dumps like:
 
     0000000: 0001 0305 1f0a 0962  .... ...b 
     0000008: 6364 6566 6768 696a  cdef ghij 
@@ -42,7 +43,19 @@ or even:
     0000020: 30 31 32 33 34 35 36 37   38 39
 
 with hexy!
- 
+
+## Accepted Input
+
+Currently, input should be one of the following:
+
+  - a `Buffer`
+  - a `String`
+  - an `Array` containing `Number`s. These should fit into
+    8 bits, i.e. be smaller than 255. Larger values are truncated
+    (specifically `val & 0xff`)
+
+## Formatting Options
+
 Formatting options are configured by passing a `format` object to the `hexy` function:
 
     var format = {}
@@ -97,22 +110,24 @@ not thoroughly tested (... eh, only on chrome [Version: whatever I'm
 currently running]). Under node, I can generally assume that binary data
 is passed in in a sane fashion using buffers, but plain old Javascript
 doesn't really have any datatypes that can handle bytes gracefully.
-Currently only Strings are supported, I'd like to add numeric and typed
-arrays.
+Currently only Strings and arrays containing Number'ish values are
+supported, I'd like to add numeric and typed arrays more explicitly.
 
 Let me know in case you run into any issues, I'd be happy to find out
 about them.
 
 ## TODOS
 
-The current version only pretty prints node Buffer and JS Strings. This
-should be expanded to also do typed arrays, Streams/series of Buffers
-which would be nice so you don't have to collect the whole things you
-want to pretty print in memory, and such.
+The current version only pretty prints node.js Buffers, and JS Strings
+and Arrays. This should be expanded to also do typed arrays,
+Streams/series of Buffers which would be nice so you don't have to
+collect the whole things you want to pretty print in memory, and such.
 
 I'd like to improve html rendering, e.g. to be able to mouse over the
 ascii annotation and highlight the hex byte and vice versa, improve
 browser integration and set up a proper build & packaging system.
+
+Better testing for browser use.
 
  
 ## Thanks
