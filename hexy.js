@@ -173,7 +173,7 @@ var Hexy = function (buffer, config) {
   config = config || {}
  
   self.buffer    = buffer // magic string conversion here?
-  self.width     = config.width || 16
+  self.width     = parseInt(config.width) || 16
   self.numbering = config.numbering == "none"  ? "none" : "hex_bytes"
    
   switch (config.format) {
@@ -256,7 +256,7 @@ var Hexy = function (buffer, config) {
       var padlen = 0
       switch(self.format) {
         case "fours":
-          padlen = self.width*2 + self.width/2
+          padlen = self.width*2 + Math.floor(self.width/2)
           break
         case "twos":
           padlen = self.width*3 + 2
@@ -324,7 +324,7 @@ var Hexy = function (buffer, config) {
     return s
   } 
   var rpad = function(s, len) {
-    for (var n = len - s.length; n!=0; --n) {
+    for (var n = len - s.length; n>0; --n) {
       if (self.html) {
         s += "&nbsp;"
       } else {

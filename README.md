@@ -138,6 +138,7 @@ cheering me up.
 * the fine folks at [Travis](http://travis-ci.org/a2800276/hexy.js)
 * radare (https://github.com/radare)
 * Michele Caini (https://github.com/skypjack)
+* Koen Houtman (https://github.com/automagisch)
 
 ## History
 

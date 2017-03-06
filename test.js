@@ -101,6 +101,9 @@ var format = [
 function check (should, is) {
   if (should !== is) {
     console.log("failed:")
+    console.log(hexy.hexy(should))
+    console.log(hexy.hexy(is))
+    console.log("==")
     console.log(should)
     console.log(is)
     return 1
@@ -163,6 +166,25 @@ empties.forEach( function (empty) {
 var arr = [0x1001, 0x2002, 0x3003, 0xf00f]
 var arr_e = "00000000: 0102 030f                                ....\n"
 failed += check(arr_e, hexy.hexy(arr))
+++total
+
+// non numerical width
+failed += check(arr_e, hexy.hexy(arr, {width: "something"}))
+++total
+
+arr_e = `00000000: 0102  ..
+00000002: 030f  ..
+`
+failed += check(arr_e, hexy.hexy(arr, {width: "2"}))
+++total
+
+arr_e = `00000000: 01  .
+00000001: 02  .
+00000002: 03  .
+00000003: 0f  .
+`
+
+failed += check(arr_e, hexy.hexy(arr, {width: 1}))
 ++total
 
 p("failed: "+failed+" of "+total)
