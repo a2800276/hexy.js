@@ -172,17 +172,12 @@ failed += check(arr_e, hexy.hexy(arr))
 failed += check(arr_e, hexy.hexy(arr, {width: "something"}))
 ++total
 
-arr_e = `00000000: 0102  ..
-00000002: 030f  ..
-`
+arr_e = "00000000: 0102  ..\n00000002: 030f  ..\n"
+
 failed += check(arr_e, hexy.hexy(arr, {width: "2"}))
 ++total
 
-arr_e = `00000000: 01  .
-00000001: 02  .
-00000002: 03  .
-00000003: 0f  .
-`
+arr_e = "00000000: 01  .\n00000001: 02  .\n00000002: 03  .\n00000003: 0f  .\n"
 
 failed += check(arr_e, hexy.hexy(arr, {width: 1}))
 ++total
