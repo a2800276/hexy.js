@@ -274,7 +274,7 @@ var Hexy = function (buffer, config) {
       }
       if (self.html) {
         str += "</div>\n"
-      } else {
+      } else if (i + 1 < line_arr.length) {
       str += "\n"
       } 
     }
