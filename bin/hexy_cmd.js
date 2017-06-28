@@ -6,13 +6,13 @@ var hexy = require("../hexy.js"),
 function usage (mes) {
   console.log(mes)
   console.log("usage bla bal bal");
-  console.log("--width     [(16)]              how many bytes per line")
-  console.log("--numbering [(hex_bytes)|none]  prefix current byte count")
-  console.log("--format    [(fours)|twos|none] how many nibbles per group")
-  console.log("--caps      [(lower)|upper]     case of hex chars")
-  console.log("--annotate  [(ascii)|none]      provide ascii annotation")
-  console.log("--prefix    [(\"\")|<prefix>]     printed in front of each line")
-  console.log("--indent    [(0)|<num>]         number of spaces to indent output")
+  console.log("--width     [(16)]                     how many bytes per line")
+  console.log("--numbering [(hex_bytes)|none]         prefix current byte count")
+  console.log("--format    [eights|(fours)|twos|none] how many nibbles per group")
+  console.log("--caps      [(lower)|upper]            case of hex chars")
+  console.log("--annotate  [(ascii)|none]             provide ascii annotation")
+  console.log("--prefix    [(\"\")|<prefix>]          printed in front of each line")
+  console.log("--indent    [(0)|<num>]                number of spaces to indent output")
   console.log("parameter in (parens) are default")
   process.exit(1)
 }

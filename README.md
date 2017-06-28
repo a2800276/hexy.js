@@ -61,7 +61,7 @@ Formatting options are configured by passing a `format` object to the `hexy` fun
     var format = {}
         format.width = width // how many bytes per line, default 16
         format.numbering = n // ["hex_bytes" | "none"],  default "hex_bytes"
-        format.format = f    // ["fours"|"twos"|"none"], how many nibbles per group
+        format.format = f    // ["eight"|"fours"|"twos"|"none"], how many nibbles per group
                              //                          default "fours"
         format.caps = c      // ["lower"|"upper"],       default lower
         format.annotate=a    // ["ascii"|"none"], ascii annotation at end of line?
