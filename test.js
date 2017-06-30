@@ -35,6 +35,10 @@ var results = [
 "00000010: 67 68 69 6a 6b 6c 6d 6e 6f 70 71 72 73 74 75 76    ghijklmnopqrstuv\n"+
 "00000020: 77 78 7a 79                                        wxzy\n",
 
+"00000000: 30313233 34353637 38396162 63646566  0123456789abcdef\n" +
+"00000010: 6768696a 6b6c6d6e 6f707172 73747576  ghijklmnopqrstuv\n" +
+"00000020: 77787a79                             wxzy\n",
+
 "00000000: 30313233343536373839616263646566  0123456789abcdef\n"+
 "00000010: 6768696a6b6c6d6e6f70717273747576  ghijklmnopqrstuv\n"+
 "00000020: 77787a79                          wxzy\n",
@@ -85,6 +89,7 @@ var format = [
   {width:8, caps:"upper"},
   {numbering:"none"},
   {format:"twos"},
+  {format:"eights"},
   {format:"none"},
   {annotate:"none"},
   {prefix:"-"},

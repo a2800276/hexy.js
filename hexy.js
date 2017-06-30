@@ -60,7 +60,7 @@
 //     var format = {}
 //         format.width = width // how many bytes per line, default 16
 //         format.numbering = n // ["hex_bytes" | "none"],  default "hex_bytes"
-//         format.format = f    // ["fours"|"twos"|"none"], how many nibbles per group
+//         format.format = f    // ["eights"|"fours"|"twos"|"none"], how many nibbles per group
 //                              //                          default "fours"
 //         format.caps = c      // ["lower"|"upper"],       default lower
 //         format.annotate=a    // ["ascii"|"none"], ascii annotation at end of line?
@@ -179,6 +179,7 @@ var Hexy = function (buffer, config) {
   switch (config.format) {
     case "none":
     case "twos":
+    case "eights":
       self.format = config.format
       break
     default:
@@ -225,9 +226,11 @@ var Hexy = function (buffer, config) {
       var hex_raw = line_arr[i],
           hex = hex_raw[0],
           raw = hex_raw[1]
-      //insert spaces every `self.format.twos` or fours
+      //insert spaces every `self.format.twos`, fours or eights
       var howMany = hex.length
-      if (self.format === "fours") {
+      if (self.format === "eights") {
+        howMany = 8
+      } else if (self.format === "fours") {
         howMany = 4
       } else if (self.format === "twos") {
         howMany = 2
@@ -255,6 +258,9 @@ var Hexy = function (buffer, config) {
       
       var padlen = 0
       switch(self.format) {
+        case "eights":
+          padlen = self.width*2 + Math.floor(self.width/4)
+          break
         case "fours":
           padlen = self.width*2 + Math.floor(self.width/2)
           break
