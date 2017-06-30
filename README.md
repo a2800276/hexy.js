@@ -139,6 +139,7 @@ cheering me up.
 * radare (https://github.com/radare)
 * Michele Caini (https://github.com/skypjack)
 * Koen Houtman (https://github.com/automagisch)
+* Stef Levesque (https://github.com/stef-levesque)
 
 ## History
 
