@@ -71,6 +71,17 @@
 //                              //                          default 0
 //         format.html=true     // funky html divs 'n stuff! experimental.
 //                              //                          default: false
+//         format.offset = X    // generate hexdump based on X byte offset
+//                              // into the provided source
+//                              //                          default 0
+//         format.length = Y    // process Y bytes of the provide source 
+//                              // starting at `offset`. -1 for all
+//                              //                          default -1
+//         format.display_offset = Z
+//                              // add Z to the address prepended to each line
+//                              // (note, even if `offset` is provided, addressing
+//                              // is started at 0)
+//                                                          dafault 0                         
 // 
 //     console.log(hexy.hexy(buffer, format))
 // 
@@ -80,7 +91,8 @@
 // 
 // ## Installing
 // 
-// Either use `npm`:
+// Either use `npm` (or whatever caompatible npm thingie people are using
+// these days) :
 //   
 //     npm install hexy
 // 
@@ -125,6 +137,8 @@
 // I'd like to improve html rendering, e.g. to be able to mouse over the
 // ascii annotation and highlight the hex byte and vice versa, improve
 // browser integration and set up a proper build & packaging system.
+//
+// Thinking about perhaps supporting typescript ...
 // 
 // Better testing for browser use.
 // 
@@ -137,6 +151,8 @@
 // * the fine folks at [Travis](http://travis-ci.org/a2800276/hexy.js)
 // * radare (https://github.com/radare)
 // * Michele Caini (https://github.com/skypjack)
+// * Koen Houtman (https://github.com/automagisch)
+// * Stef Levesque (https://github.com/stef-levesque)
 // 
 // ## History
 // 
@@ -351,9 +367,10 @@ var Hexy = function (buffer, config) {
 
 }
 
+Hexy.VERSION = "0.2.11"
 
 // This is probably not the prettiest or coolest way to to determine runtime
-// environment. It seems to work and Im not up to the task figuring out what
+// environment. It seems to work and I'm not up to the task figuring out what
 // the module system du jour is and how to interface with it ...
 
 // If anyone wants to fix this to include this module "properly", I'm more than

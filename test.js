@@ -187,6 +187,17 @@ arr_e = "00000000: 01  .\n00000001: 02  .\n00000002: 03  .\n00000003: 0f  .\n"
 failed += check(arr_e, hexy.hexy(arr, {width: 1}))
 ++total
 
+function checkVersion () {
+  const fs = require("fs") 
+  const pkg = fs.readFileSync("package.json") 
+  const version = JSON.parse(pkg).version
+
+  failed += check(version, hexy.Hexy.VERSION)
+  ++total
+}
+checkVersion()
+
+
 p("failed: "+failed+" of "+total)
 
 if (failed != 0) {
