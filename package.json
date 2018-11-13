@@ -1,16 +1,21 @@
 {
-  "name" : "hexy",
-  "version" : "0.2.11",
-  "description" : "hexdump, binary pretty-printing",
-  "author" : "Tim Becker <tim.becker@kuriositaet.de>",
+  "name": "hexy",
+  "version": "0.2.11",
+  "description": "hexdump, binary pretty-printing",
+  "author": "Tim Becker <tim.becker@kuriositaet.de>",
   "license": "MIT",
-  "main" : "./hexy.js",
+  "main": "./hexy.js",
   "repository": {
     "type": "git",
     "url": "git://github.com/a2800276/hexy.js.git"
   },
-  "scripts" : {
-    "test" : "node ./test.js"
+  "scripts": {
+    "test": "node ./test.js"
   },
-  "bin": {"hexy" : "./bin/hexy_cmd.js"}
+  "bin": {
+    "hexy": "./bin/hexy_cmd.js"
+  },
+  "dependencies": {
+    "@types/node": "^10.12.6"
+  }
 }
