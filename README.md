@@ -8,12 +8,13 @@
  
  It should create a pleasant looking hex dumb by default:
      
-     var hexy = require('hexy'),
-            b = new Buffer("\000\001\003\005\037\012\011bcdefghijklmnopqrstuvwxyz0123456789")
-             // or String or Array containing numbers ( bytes, i.e. < 0xFF )
-     
-     console.log(hexy.hexy(b))
- 
+```javascript     
+var hexy = require('hexy'),
+    b = new Buffer("\000\001\003\005\037\012\011bcdefghijklmnopqrstuvwxyz0123456789")
+        // or String or Array containing numbers ( bytes, i.e. < 0xFF )
+
+console.log(hexy.hexy(b))
+ ```
  results in this dump:
  
      00000000: 0001 0305 1f0a 0962 6364 6566 6768 696a  .......bcdefghij
@@ -59,34 +60,35 @@
  
  Formatting options are configured by passing a `format` object to the `hexy` function:
  
-     var format = {}
-         format.width = width // how many bytes per line, default 16
-         format.numbering = n // ["hex_bytes" | "none"],  default "hex_bytes"
-         format.format = f    // ["eights"|"fours"|"twos"|"none"], how many nibbles per group
-                              //                          default "fours"
-         format.caps = c      // ["lower"|"upper"],       default lower
-         format.annotate=a    // ["ascii"|"none"], ascii annotation at end of line?
-                              //                          default "ascii"
-         format.prefix=p      // <string> something pretty to put in front of each line
-                              //                          default ""
-         format.indent=i      // <num> number of spaces to indent
-                              //                          default 0
-         format.html=true     // funky html divs 'n stuff! experimental.
-                              //                          default: false
-         format.offset = X    // generate hexdump based on X byte offset
-                              // into the provided source
-                              //                          default 0
-         format.length = Y    // process Y bytes of the provide source 
-                              // starting at `offset`. -1 for all
-                              //                          default -1
-         format.display_offset = Z
-                              // add Z to the address prepended to each line
-                              // (note, even if `offset` is provided, addressing
-                              // is started at 0)
-                                                          dafault 0                         
- 
-     console.log(hexy.hexy(buffer, format))
- 
+```javascript
+var format = {}
+    format.width = width // how many bytes per line, default 16
+    format.numbering = n // ["hex_bytes" | "none"],  default "hex_bytes"
+    format.format = f    // ["eights"|"fours"|"twos"|"none"], how many nibbles per group
+                         //                          default "fours"
+    format.caps = c      // ["lower"|"upper"],       default lower
+    format.annotate=a    // ["ascii"|"none"], ascii annotation at end of line?
+                         //                          default "ascii"
+    format.prefix=p      // <string> something pretty to put in front of each line
+                         //                          default ""
+    format.indent=i      // <num> number of spaces to indent
+                         //                          default 0
+    format.html=true     // funky html divs 'n stuff! experimental.
+                         //                          default: false
+    format.offset = X    // generate hexdump based on X byte offset
+                         // into the provided source
+                         //                          default 0
+    format.length = Y    // process Y bytes of the provide source 
+                         // starting at `offset`. -1 for all
+                         //                          default -1
+    format.display_offset = Z
+                         // add Z to the address prepended to each line
+                         // (note, even if `offset` is provided, addressing
+                         // is started at 0)
+                                                     dafault 0                         
+
+console.log(hexy.hexy(buffer, format))
+``` 
  In case you're really nerdy, you'll have noticed that the defaults correspond
  to how `xxd` formats it's output.
             
@@ -96,14 +98,17 @@
  Either use `npm` (or whatever caompatible npm thingie people are using
  these days) :
    
-     npm install hexy
- 
+```shell   
+$ npm install hexy
+```
+
  This will install the lib which you'll be able to use like so:
      
-     var hexy = require("hexy"),
-         buf  = // get Buffer from somewhere,
-         str  = hexy.hexy(buf)
- 
+```javascript     
+var hexy = require("hexy"),
+    buf  = // get Buffer from somewhere,
+    str  = hexy.hexy(buf)
+ ```
  It will also install `hexy` into your path in case you're totally fed up
  with using `xxd`.
          
@@ -112,6 +117,14 @@
  
      http://github.com/a2800276/hexy.js
  
+ ## Typescript
+
+```typescript
+import {hexy} from "hexy";
+const buff = ...
+console.log(hexy(buff));
+```
+
  ## Browser Support
  
  Basically eveything should work fine in the browser as well, just
