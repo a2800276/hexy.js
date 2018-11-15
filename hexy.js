@@ -7,7 +7,7 @@
 // It should create a pleasant looking hex dumb by default:
 //     
 //     var hexy = require('hexy'),
-//            b = new Buffer("\000\001\003\005\037\012\011bcdefghijklmnopqrstuvwxyz0123456789")
+//            b = Buffer.from("\000\001\003\005\037\012\011bcdefghijklmnopqrstuvwxyz0123456789")
 //             // or String or Array containing numbers ( bytes, i.e. < 0xFF )
 //     
 //     console.log(hexy.hexy(b))
@@ -178,12 +178,13 @@ var hexy = function (buffer, config) {
 
 var Hexy = function (buffer, config) {
   var self = this
-  
+ 	
+  // if we have a Buffer class, convert
   if (typeof Buffer !== 'undefined') {
     buffer = (Buffer.isBuffer(buffer) && buffer) 
-      || (typeof buffer === 'string' && new Buffer(buffer)) 
-      || (buffer && (buffer.constructor === Array) && new Buffer(buffer)) // accept num arrays
-      || new Buffer(0)
+      || (typeof buffer === 'string' && Buffer.from(buffer)) 
+      || (buffer && (buffer.constructor === Array) && Buffer.from(buffer)) // accept num arrays
+      || Buffer.alloc(0)
   }
   buffer = buffer || []
   config = config || {}

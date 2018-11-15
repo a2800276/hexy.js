@@ -1,6 +1,6 @@
 var hexy = require("./hexy.js")
 
-var buf = new Buffer("0123456789abcdefghijklmnopqrstuvwxzy")
+var buf = Buffer.from("0123456789abcdefghijklmnopqrstuvwxzy")
 var str = "0123456789abcdefghijklmnopqrstuvwxzy"
 var nums = [ 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 97, 98, 99, 100, 
   101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114,
