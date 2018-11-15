@@ -10,7 +10,7 @@
      
 ```javascript     
 var hexy = require('hexy'),
-    b = new Buffer("\000\001\003\005\037\012\011bcdefghijklmnopqrstuvwxyz0123456789")
+    b = Buffer.from("\000\001\003\005\037\012\011bcdefghijklmnopqrstuvwxyz0123456789")
         // or String or Array containing numbers ( bytes, i.e. < 0xFF )
 
 console.log(hexy.hexy(b))
@@ -153,7 +153,6 @@ console.log(hexy(buff));
  ascii annotation and highlight the hex byte and vice versa, improve
  browser integration and set up a proper build & packaging system.
 
- Thinking about perhaps supporting typescript ...
  
  Better testing for browser use.
  
@@ -168,6 +167,7 @@ console.log(hexy(buff));
  * Michele Caini (https://github.com/skypjack)
  * Koen Houtman (https://github.com/automagisch)
  * Stef Levesque (https://github.com/stef-levesque)
+ * Abdulaziz Ghuloum (https://github.com/azizghuloum)
  
  ## History
  
@@ -177,6 +177,11 @@ console.log(hexy(buff));
      http://github.com/a2800276/hexy
   
  in case these sorts of things interest you.
+
+ ### 0.3.0
+
+ * adds typescript support. Thanks Abdulaziz!
+ * remove support for old node versions (0.6-0.12)
  
  ## Mail
  
