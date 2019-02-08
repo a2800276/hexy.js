@@ -67,6 +67,8 @@
 //      format.caps = c      // ["lower"|"upper"],       default lower
 //      format.annotate=a    // ["ascii"|"none"], ascii annotation at end of line?
 //                           //                          default "ascii"
+//      format.separator=s   // ["space"|"tab"], use space OR tab for separating hex and ascii data
+//                           //                          default "space"
 //      format.prefix=p      // <string> something pretty to put in front of each line
 //                           //                          default ""
 //      format.indent=i      // <num> number of spaces to indent
@@ -83,7 +85,7 @@
 //                           // add Z to the address prepended to each line
 //                           // (note, even if `offset` is provided, addressing
 //                           // is started at 0)
-//                                                       dafault 0                         
+//                           //                          dafault 0                         
 //  
 //  console.log(hexy.hexy(buffer, format))
 //  ``` 
@@ -222,7 +224,8 @@ var Hexy = function (buffer, config) {
   }
   
   self.caps        = config.caps        == "upper" ? "upper" : "lower"
-  self.annotate    = config.annotate    == "none"  ? "none"  : "ascii"
+  self.annotate    = config.annotate    || "ascii"
+  self.separator   = config.separator   || "space"
   self.prefix      = config.prefix      || ""
   self.indent      = config.indent      || 0
   self.html        = config.html        || false
@@ -308,7 +311,11 @@ var Hexy = function (buffer, config) {
 
       str += rpad(hex_formatted, padlen)
       if (self.annotate === "ascii") {
-        str+=" "
+        if (self.separator === "space") {
+          str += " "
+        } else if (self.separator === "tab") {
+          str += "\t"
+        }
         var ascii = raw.replace(/[\000-\040\177-\377]/g, ".")
         if (self.html) {str += escape(ascii)}
         else { str += ascii }

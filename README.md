@@ -69,6 +69,8 @@ var format = {}
     format.caps = c      // ["lower"|"upper"],       default lower
     format.annotate=a    // ["ascii"|"none"], ascii annotation at end of line?
                          //                          default "ascii"
+     format.separator=s   // ["space"|"tab"], use space OR tab for separating hex and ascii data
+                          //                          default "space"
     format.prefix=p      // <string> something pretty to put in front of each line
                          //                          default ""
     format.indent=i      // <num> number of spaces to indent
