@@ -5,7 +5,7 @@ declare module "hexy" {
     numbering?: "hex_bytes" | "none";
     format?: "eights" | "fours" | "twos" | "none";
     caps?: "lower" | "upper";
-    annotate?: "ascii" | "none";
+    annotate?: "ascii" | "ebcdic" | "ascii_ebcdic" |"none";
     prefix?: string;
     indent?: number;
     html?: boolean;
