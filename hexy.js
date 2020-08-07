@@ -319,9 +319,9 @@
           for (const b of raw) {
             ascii = ascii.concat(codepage.utils.decode(28591, [b], 'str').replace(/[\x00-\x08\x0A-\x1F\x80-\xFF]/g, "."));
           }
-          ascii = rpad(ascii, self.width)
-          if (self.html) { str += escape(ascii) }
-          else { str += ascii }
+          // ascii = rpad(ascii, self.width)
+          if (self.html) { str += rpad(escape(ascii), self.width) }
+          else { str += rpad(ascii, self.width) }
         }
         if (self.annotate === "ebcdic" || self.annotate === "ascii_ebcdic") {
           str += "\t\t"
@@ -329,9 +329,8 @@
           for (const b of raw) {
             ebcdic = ebcdic.concat(codepage.utils.decode(37, [b], 'str').replace(/[\x00-\x08\x0A-\x1F\x80-\xFF]/g, "."));
           }
-          ebcdic = rpad(ebcdic, self.width);
-          if (self.html) { str += escape(ebcdic) }
-          else { str += ebcdic }
+          if (self.html) { str += rpad(escape(ebcdic), self.width) }
+          else { str += rpad(ebcdic, self.width) }
         }
         if (self.html) {
           str += "</div>\n"
