@@ -1,11 +1,11 @@
 
-declare module "hexy" {
+declare module "hexyz" {
   type FormatOptions = {
     width?: number;
     numbering?: "hex_bytes" | "none";
     format?: "eights" | "fours" | "twos" | "none";
     caps?: "lower" | "upper";
-    annotate?: "ascii" | "ebcdic" | "ascii_ebcdic" |"none";
+    annotate?: "ascii" | "ebcdic" | "ascii_ebcdic" | "none";
     prefix?: string;
     indent?: number;
     html?: boolean;
@@ -13,5 +13,5 @@ declare module "hexy" {
     length?: number;
     display_offset?: number;
   }
-  export const hexy: (arg: Buffer | string | number[], format?: FormatOptions) => string;
+  export const hexyz: (arg: Buffer | string | number[], format?: FormatOptions) => string;
 }

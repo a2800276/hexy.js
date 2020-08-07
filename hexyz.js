@@ -191,12 +191,12 @@
 
   var codepage = require('codepage');
 
-  var hexy = function (buffer, config) {
-    var h = new Hexy(buffer, config)
+  var hexyz = function (buffer, config) {
+    var h = new Hexyz(buffer, config)
     return h.toString()
   }
 
-  var Hexy = function (buffer, config) {
+  var Hexyz = function (buffer, config) {
     var self = this
 
     // if we have a Buffer class, convert
@@ -405,7 +405,7 @@
 
   }
 
-  Hexy.VERSION = "0.1.0"
+  Hexyz.VERSION = "0.1.0"
 
   // This is probably not the prettiest or coolest way to to determine runtime
   // environment. It seems to work and I'm not up to the task figuring out what
@@ -423,7 +423,7 @@
     // who knows?
     _exp = arg // or this or somethings. ...
   }
-  _exp.hexy = hexy
-  _exp.Hexy = Hexy
+  _exp.hexyz = hexyz
+  _exp.Hexyz = Hexyz
 
 })(this)

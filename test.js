@@ -1,4 +1,4 @@
-var hexy = require("./hexy.js")
+var hexyz = require("./hexyz.js")
 
 var buf = Buffer.from("0123456789abcdefghijklmnopqrstuvwxzy")
 var str = "0123456789abcdefghijklmnopqrstuvwxzy"
@@ -106,8 +106,8 @@ var format = [
 function check (should, is) {
   if (should !== is) {
     console.log("failed:")
-    console.log(hexy.hexy(should))
-    console.log(hexy.hexy(is))
+    console.log(hexyz.hexyz(should))
+    console.log(hexyz.hexyz(is))
     console.log("==")
     console.log(should)
     console.log(is)
@@ -116,18 +116,18 @@ function check (should, is) {
   return 0
 }
 
-check (results[0], hexy.hexy(buf))
+check (results[0], hexyz.hexyz(buf))
 
 function p (o) {console.log(o)}
 
 var total, failed;
 total = failed = 0
 for (var i = 0; i!= format.length ; ++i) {
-  failed += check(results[i], hexy.hexy(buf, format[i]))
+  failed += check(results[i], hexyz.hexyz(buf, format[i]))
   ++total
-  failed += check(results[i], hexy.hexy(str, format[i]))
+  failed += check(results[i], hexyz.hexyz(str, format[i]))
   ++total
-  failed += check(results[i], hexy.hexy(nums, format[i]))
+  failed += check(results[i], hexyz.hexyz(nums, format[i]))
   ++total
 }
 
@@ -140,7 +140,7 @@ _5100 = "Q"+_00
 var str2 = _00 + _00 + _08 + _40 + _53 + _00 + _0000 + _5100 + _0000 + _5100 + _0000
 var xxd2 = "00000000: 0000 0840 5300 0000 5100 0000 5100 0000 \t\t...@S...Q...Q...\n"
 
-failed += check(xxd2, hexy.hexy(str2))
+failed += check(xxd2, hexyz.hexyz(str2))
 ++total
 
 
@@ -148,7 +148,7 @@ str3 = "#include<stdio.h>\n"
 xxd3 = "00000000: 2369 6e63 6c75 6465 3c73 7464 696f 2e68 \t\t#include<stdio.h\n"+
        "00000010: 3e0a                                    \t\t>.              \n"
 
-failed += check(xxd3, hexy.hexy(str3))
+failed += check(xxd3, hexyz.hexyz(str3))
 ++total
 
 xxd4 = "<div class='hexy'>\n"+
@@ -156,13 +156,13 @@ xxd4 = "<div class='hexy'>\n"+
        "<div class='00000010  odd'>00000010: 3e0a &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\t\t&gt;.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>\n"+
        "</div>\n"
 
-failed += check(xxd4, hexy.hexy(str3, {html:true}))
+failed += check(xxd4, hexyz.hexyz(str3, {html:true}))
 ++total
 
 // empty string/buffer/nil etc should return empty string, as does xxd
 var empties = ["", undefined, null]
 empties.forEach( function (empty) {
-  failed += check("", hexy.hexy(empty))
+  failed += check("", hexyz.hexyz(empty))
   ++total
 })
 
@@ -170,21 +170,21 @@ empties.forEach( function (empty) {
 // 0xff are truncated ( val & 0xff )
 var arr = [0x1001, 0x2002, 0x3003, 0xf00f]
 var arr_e = "00000000: 0102 030f                               \t\t....            \n"
-failed += check(arr_e, hexy.hexy(arr))
+failed += check(arr_e, hexyz.hexyz(arr))
 ++total
 
 // non numerical width
-failed += check(arr_e, hexy.hexy(arr, {width: "something"}))
+failed += check(arr_e, hexyz.hexyz(arr, {width: "something"}))
 ++total
 
 arr_e = "00000000: 0102 \t\t..\n00000002: 030f \t\t..\n"
 
-failed += check(arr_e, hexy.hexy(arr, {width: "2"}))
+failed += check(arr_e, hexyz.hexyz(arr, {width: "2"}))
 ++total
 
 arr_e = "00000000: 01 \t\t.\n00000001: 02 \t\t.\n00000002: 03 \t\t.\n00000003: 0f \t\t.\n"
 
-failed += check(arr_e, hexy.hexy(arr, {width: 1}))
+failed += check(arr_e, hexyz.hexyz(arr, {width: 1}))
 ++total
 
 function checkVersion () {
@@ -192,7 +192,7 @@ function checkVersion () {
   const pkg = fs.readFileSync("package.json") 
   const version = JSON.parse(pkg).version
 
-  failed += check(version, hexy.Hexy.VERSION)
+  failed += check(version, hexyz.Hexyz.VERSION)
   ++total
 }
 checkVersion()
