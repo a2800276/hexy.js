@@ -9,6 +9,9 @@
     "type": "git",
     "url": "git://github.com/crshnburn/hexyz.git"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "test": "node ./test.js"
   },
