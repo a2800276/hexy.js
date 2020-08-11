@@ -1,6 +1,6 @@
 {
   "name": "@crshnburn/hexyz",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "hexdump, binary pretty-printing, ebcdic",
   "author": "Tim Becker <tim.becker@kuriositaet.de>, Andrew Smithson <smithson@uk.ibm.com>",
   "license": "MIT",

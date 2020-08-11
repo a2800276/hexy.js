@@ -405,7 +405,7 @@
 
   }
 
-  Hexyz.VERSION = "1.0.1"
+  Hexyz.VERSION = "1.0.2"
 
   // This is probably not the prettiest or coolest way to to determine runtime
   // environment. It seems to work and I'm not up to the task figuring out what
