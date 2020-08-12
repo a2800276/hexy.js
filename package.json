@@ -13,10 +13,11 @@
     "access": "public"
   },
   "scripts": {
-    "test": "node ./test.js"
+    "test": "jest"
   },
   "devDependencies": {
-    "@types/node": "^10.12.6"
+    "@types/node": "^10.12.6",
+    "jest": "^26.3.0"
   },
   "dependencies": {
     "codepage": "^1.14.0"
