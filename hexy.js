@@ -1,3 +1,4 @@
+"use strict";
 //   # hexy.js -- utility to create hex dumps 
 //   
 //   `hexy` is a javascript library that's easy to use to create hex dumps. It
@@ -175,7 +176,12 @@
 //       http://github.com/a2800276/hexy
 //    
 //   in case these sorts of things interest you.
-//  
+//
+//   ### 0.3.1
+//
+//   * use strict
+//   * fixes undefined var. Thanks m-kircher!
+//
 //   ### 0.3.0
 //  
 //   * adds typescript support. Thanks Abdulaziz!
@@ -386,7 +392,7 @@ var Hexy = function (buffer, config) {
 
 }
 
-Hexy.VERSION = "0.3.0"
+Hexy.VERSION = "0.3.1"
 
 // This is probably not the prettiest or coolest way to to determine runtime
 // environment. It seems to work and I'm not up to the task figuring out what

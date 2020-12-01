@@ -1,6 +1,6 @@
 {
   "name": "hexy",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "hexdump, binary pretty-printing",
   "author": "Tim Becker <tim.becker@kuriositaet.de>",
   "license": "MIT",
@@ -16,6 +16,6 @@
     "hexy": "./bin/hexy_cmd.js"
   },
   "devDependencies": {
-    "@types/node": "^10.12.6"
+    "@types/node": "14.x"
   }
 }
