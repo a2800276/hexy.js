@@ -177,6 +177,11 @@ console.log(hexy(buff));
      http://github.com/a2800276/hexy
   
  in case these sorts of things interest you.
+ 
+ ### 0.3.1
+ 
+ * use strict
+ * fixes undefined var. Thanks m-kircher!
 
  ### 0.3.0
 
