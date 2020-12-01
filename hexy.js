@@ -287,7 +287,7 @@ var Hexy = function (buffer, config) {
 
       var addr = (i*self.width)+self.offset+self.display_offset;
       if (self.html) {
-        odd = i%2 == 0 ? " even" : "  odd"
+        var odd = i%2 == 0 ? " even" : "  odd"
         str += "<div class='"+pad(addr, 8)+odd+"'>"
       }
       str += self.prefix 
