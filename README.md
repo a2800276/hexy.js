@@ -2,11 +2,11 @@
 
  # hexy.js -- utility to create hex dumps 
  
- `hexy` is a javascript library that's easy to use to create hex dumps. It
- works well in node and has cursory browser (more below) support. It contains a
+ `hexy` is an easy to use javascript library to create hex dumps. It
+ works just as well in node as in your browser. It contains a
  number of options to configure how the hex dump will end up looking.
  
- It should create a pleasant looking hex dumb by default:
+ It creates a pleasant looking hex dump by default:
      
 ```javascript     
 var hexy = require('hexy'),
@@ -15,18 +15,19 @@ var hexy = require('hexy'),
 
 console.log(hexy.hexy(b))
  ```
+
  results in this dump:
  
      00000000: 0001 0305 1f0a 0962 6364 6566 6768 696a  .......bcdefghij
      00000010: 6b6c 6d6e 6f70 7172 7374 7576 7778 797a  klmnopqrstuvwxyz
      00000020: 3031 3233 3435 3637 3839                 0123456789
  
- but it's also possible to configure:
+ but you can configure:
  
    * Line numbering
    * Line width
    * Format of byte grouping
-   * Case of hex decimals
+   * The case (upper/lower) of hex decimals
    * Presence of the ASCII annotation in the right column.
  
  This means it's easy to generate exciting dumps like:
@@ -85,12 +86,12 @@ var format = {}
                          // add Z to the address prepended to each line
                          // (note, even if `offset` is provided, addressing
                          // is started at 0)
-                                                     dafault 0                         
+                         //                          default 0                         
 
 console.log(hexy.hexy(buffer, format))
 ``` 
  In case you're really nerdy, you'll have noticed that the defaults correspond
- to how `xxd` formats it's output.
+ to how `xxd` formats its output.
             
  
  ## Installing
@@ -109,6 +110,7 @@ var hexy = require("hexy"),
     buf  = // get Buffer from somewhere,
     str  = hexy.hexy(buf)
  ```
+
  It will also install `hexy` into your path in case you're totally fed up
  with using `xxd`.
          
@@ -153,6 +155,7 @@ console.log(hexy(buff));
  ascii annotation and highlight the hex byte and vice versa, improve
  browser integration and set up a proper build & packaging system.
 
+ Deno support would also be nice.
  
  Better testing for browser use.
  
@@ -177,6 +180,11 @@ console.log(hexy(buff));
      http://github.com/a2800276/hexy
   
  in case these sorts of things interest you.
+
+ ### 0.3.2
+ 
+ * documentation typos
+ * 2FA for npm publish
  
  ### 0.3.1
  
