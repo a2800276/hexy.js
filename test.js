@@ -105,7 +105,7 @@ var format = [
 
 function check (should, is) {
   if (should !== is) {
-    console.log("failed:")
+    console.log("failed (should/is):")
     console.log(hexy.hexy(should))
     console.log(hexy.hexy(is))
     console.log("==")
@@ -185,6 +185,28 @@ failed += check(arr_e, hexy.hexy(arr, {width: "2"}))
 arr_e = "00000000: 01  .\n00000001: 02  .\n00000002: 03  .\n00000003: 0f  .\n"
 
 failed += check(arr_e, hexy.hexy(arr, {width: 1}))
+++total
+
+// format ascii > 0x7F as .
+// https://github.com/a2800276/hexy.js/issues/17
+
+function testIssue17 () {
+  const bufs = ["68656c6c6fd2776f726c64",
+                "68656c6cc3b620776f726c64"]
+  const shoulds = ["00000000: 6865 6c6c 6fd2 776f 726c 64              hello.world\n",
+                   "00000000: 6865 6c6c c3b6 2077 6f72 6c64            hell...world\n"] // hellö world
+  // javascript is soooo confusing concerning bytes/strings/blas so I most
+  // certainly got something wrong, see `lines` in the main code
+  // would like to add some more example with other multibyte chars, encodings, etc.
+  let failed = 0
+  for (let i = 0; i!= bufs.length; ++i) {
+    const buf = Buffer.from(bufs[i], 'hex');
+    const is = hexy.hexy(buf);
+    failed += check(shoulds[i], is)
+  }
+  return failed
+}
+failed += testIssue17()
 ++total
 
 function checkVersion () {

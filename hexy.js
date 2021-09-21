@@ -275,7 +275,7 @@ var Hexy = function (buffer, config) {
     for (var i = 0; i!= line_arr.length; ++i) {
       var hex_raw = line_arr[i],
           hex = hex_raw[0],
-          raw = hex_raw[1]
+          ascii = hex_raw[1]
       //insert spaces every `self.format.twos`, fours or eights
       var howMany = hex.length
       if (self.format === "eights") {
@@ -324,7 +324,6 @@ var Hexy = function (buffer, config) {
       str += rpad(hex_formatted, padlen)
       if (self.annotate === "ascii") {
         str+=" "
-        var ascii = raw.replace(/[\000-\040\177-\377]/g, ".")
         if (self.html) {str += escape(ascii)}
         else { str += ascii }
       }
@@ -344,13 +343,21 @@ var Hexy = function (buffer, config) {
       var begin = i,
           end   = i+self.width >= self.buffer.length ? self.buffer.length : i+self.width,
           slice = self.buffer.slice(begin, end),
-          hex   = self.caps === "upper" ? hexu(slice) : hexl(slice),
-          raw   = slice.toString('ascii')
-      
-      if (self.buffer.constructor == Array) {
-        raw = String.fromCharCode.apply(self, slice)
+          hex   = self.caps === "upper" ? hexu(slice) : hexl(slice)
+
+      let raw = ""
+      for (let i = 0; i!= slice.length; ++i) {
+        if (slice[i] >= 127) {
+          raw += "."
+        } else {
+          raw += String.fromCharCode(slice[i])
+        }
       }
-      hex_raw.push([hex,raw])
+
+      let cooked = raw.replace(/[\000-\040\177-\377]/g, ".") // this takes care
+      // of all non printable ascii chars, but doesn't eliminate all non-ascii
+      // chars, because regexp are unicode aware (apparently)
+      hex_raw.push([hex, cooked])
     }
     return hex_raw
 
@@ -401,7 +408,7 @@ var Hexy = function (buffer, config) {
 
 }
 
-Hexy.VERSION = "0.3.2"
+Hexy.VERSION = "0.3.3"
 
 // This is probably not the prettiest or coolest way to to determine runtime
 // environment. It seems to work and I'm not up to the task figuring out what
