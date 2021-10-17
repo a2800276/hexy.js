@@ -65,16 +65,25 @@ console.log(hexy.hexy(b))
 var format = {}
     format.width = width // how many bytes per line, default 16
     format.numbering = n // ["hex_bytes" | "none"],  default "hex_bytes"
-    format.format = f    // ["eights"|"fours"|"twos"|"none"], how many nibbles per group
+    format.base = b      // [2, 8, 10, 16], the base (radix) for numeral representation
+                         // for the right column,    default 16
+    format.format = f    // ["twos"|"fours"|"eights"|"sixteens"|"none"], number of nibbles per group
                          //                          default "fours"
+    format.littleEndian = true
+                         // endiannes of data,       default false
+                         // counts when number of nibbles is more than "twos",
+                         // i.e. displaying groups bigger than one byte
+    format.extendedChs = true
+                         // allow displaying more characters in the text column
+                         //                          default false
     format.caps = c      // ["lower"|"upper"],       default lower
-    format.annotate=a    // ["ascii"|"none"], ascii annotation at end of line?
+    format.annotate = a  // ["ascii"|"none"], ascii annotation at end of line?
                          //                          default "ascii"
-    format.prefix=p      // <string> something pretty to put in front of each line
+    format.prefix = p    // <string> something pretty to put in front of each line
                          //                          default ""
-    format.indent=i      // <num> number of spaces to indent
+    format.indent = i    // <num> number of spaces to indent
                          //                          default 0
-    format.html=true     // funky html divs 'n stuff! experimental.
+    format.html = true   // funky html divs 'n stuff! experimental.
                          //                          default: false
     format.offset = X    // generate hexdump based on X byte offset
                          // into the provided source
@@ -86,7 +95,7 @@ var format = {}
                          // add Z to the address prepended to each line
                          // (note, even if `offset` is provided, addressing
                          // is started at 0)
-                         //                          default 0                         
+                         //                          default 0
 
 console.log(hexy.hexy(buffer, format))
 ``` 
@@ -96,7 +105,7 @@ console.log(hexy.hexy(buffer, format))
  
  ## Installing
  
- Either use `npm` (or whatever caompatible npm thingie people are using
+ Either use `npm` (or whatever compatible npm thingie people are using
  these days) :
    
 ```shell   
@@ -180,6 +189,31 @@ console.log(hexy(buff));
      http://github.com/a2800276/hexy
   
  in case these sorts of things interest you.
+
+### 0.3.3
+
+* introduced the concept of endiannes (googleable and wikiable).  Before this change, the code assumed that the displayed data is big-endian.
+    However, most file formats and most CPU architectures are little-endian.  So, introduced the support for it.
+    The endiannes can be controlled by passing bool via `littleEndian`, which defaults to `false` to support the behavior of the previous versions
+* introduced ability to group 8 bytes (16 nibbles).  With prevalence of 64-bit computing, the 64-bit (i.e. 8-byte) data is getting more and more popular.
+    The 8-byte grouping is enabled by passing "sixteens" into `config.format`
+* introduced ability to display the binary data in bases other than hexadecimal: binary, octal, decimal and hexadecimal
+    The base is controlled by passing 2, 8, 10 or 16 into `config.base`
+* introduced ability to control if non-printable characters are displayed or replaced with '.'.
+    To display extended characters, pass `config.extendedChs: true`. The exact behavior of this flag depends on the output type, html or not:
+    In `config.html: true` mode, all the characters can be displayed, even 0-0x20 have visual represenation.
+    In `config.html: false` mode, only the extended characters beyond the end of standard ASCII are displayed.
+* implemented and exported `maxnumberlen()` -- calculates how many characters can a number occupy
+* nit: removed some of unused variables
+* formating consistency: slightly reformatted code around my changes
+* general readability: flipped some `switch()` statements around to handle most common cases on top
+* a bit more order in the test
+* benchmarked the changes by runnng the test suite in loop 100 of times (before -> after) on the same set of tests.  Some results:
+  Windows 10 @Ryzen 5800x:
+  Windows 10 @Intel i5-7660:
+  Linux @Intel i7-3667U 2GHz:
+  Linux R-Pi 4:
+  MacBook Air @M1: 0.0297sec -> 0.0292sec
 
  ### 0.3.2
  

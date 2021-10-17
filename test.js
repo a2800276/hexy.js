@@ -1,12 +1,23 @@
 var hexy = require("./hexy.js")
 
-var buf = Buffer.from("0123456789abcdefghijklmnopqrstuvwxzy")
-var str = "0123456789abcdefghijklmnopqrstuvwxzy"
-var nums = [ 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 97, 98, 99, 100, 
+const buf = Buffer.from("0123456789abcdefghijklmnopqrstuvwxzy")
+const str = "0123456789abcdefghijklmnopqrstuvwxzy"
+const nums = [ 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 97, 98, 99, 100, 
   101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114,
   115, 116, 117, 118, 119, 120, 122, 121 ]
 
-var results = [
+const _00 = String.fromCharCode(0)
+const _0000 = _00 + _00
+const _08 = String.fromCharCode(8)
+const _40 = "@"
+const _53 = "S"
+const _5100 = "Q"+_00
+const str3 = "#include<stdio.h>\n"
+const arr = [0x1001, 0x2002, 0x3003, 0xf00f]
+const arr_e = "00000000: 0102 030f                                ....\n"
+
+
+const results = [
 "00000000: 3031 3233 3435 3637 3839 6162 6364 6566  0123456789abcdef\n"+
 "00000010: 6768 696a 6b6c 6d6e 6f70 7172 7374 7576  ghijklmnopqrstuv\n"+
 "00000020: 7778 7a79                                wxzy\n",
@@ -82,126 +93,100 @@ var results = [
 "00000014: 6162 6364 6566 6768 696a                 abcdefghij\n",
 ]
 
-var format = [
-  {},
-  {caps:"upper"},
-  {width:8},
-  {width:8, caps:"upper"},
-  {numbering:"none"},
-  {format:"twos"},
-  {format:"eights"},
-  {format:"none"},
-  {annotate:"none"},
-  {prefix:"-"},
-  {indent:"5"},
-  {caps:"upper", numbering:"none", annotate:"none", prefix:"dingdong", format:"twos"},
-  {html:true},
-  {offset:10},
-  {offset:10, length:10},
-  {offset:10, length:10, html:true},
-  {display_offset: 10},
-  {display_offset: 10, offset:10, length:10},
+const testcases = [
+// #0
+  { input: buf, params: {}, result: results[0] }, // historic first testcase will always remain #0
+  { inputs: [buf, str, nums], params: {}, result: results[0] },
+  { inputs: [buf, str, nums], params: {caps:"upper"}, result: results[1] },
+  { inputs: [buf, str, nums], params: {width:8}, result: results[2] },
+  { inputs: [buf, str, nums], params: {width:8, caps:"upper"}, result: results[3] },
+  { inputs: [buf, str, nums], params: {numbering:"none"}, result: results[4] },
+  { inputs: [buf, str, nums], params: {format:"twos"}, result: results[5] },
+  { inputs: [buf, str, nums], params: {format:"eights"}, result: results[6] },
+  { inputs: [buf, str, nums], params: {format:"none"}, result: results[7] },
+  { inputs: [buf, str, nums], params: {annotate:"none"}, result: results[8] },
+// #10
+  { inputs: [buf, str, nums], params: {prefix:"-"}, result: results[9] },
+  { inputs: [buf, str, nums], params: {indent:"5"}, result: results[10] },
+  { inputs: [buf, str, nums], params: {caps:"upper", numbering:"none", annotate:"none", prefix:"dingdong", format:"twos"}, result: results[11] },
+  { inputs: [buf, str, nums], params: {html:true}, result: results[12] },
+  { inputs: [buf, str, nums], params: {offset:10}, result: results[13] },
+  { inputs: [buf, str, nums], params: {offset:10, length:10}, result: results[14] },
+  { inputs: [buf, str, nums], params: {offset:10, length:10, html:true}, result: results[15] },
+  { inputs: [buf, str, nums], params: {display_offset:10}, result: results[16] },
+  { inputs: [buf, str, nums], params: {display_offset:10, offset:10, length:10}, result: results[17] },
+  { input: _00 + _00 + _08 + _40 + _53 + _00 + _0000 + _5100 + _0000 + _5100 + _0000, params: {}, result: "00000000: 0000 0840 5300 0000 5100 0000 5100 0000  ...@S...Q...Q...\n" },
+// #20
+  { input: str3, params: {}, result: "00000000: 2369 6e63 6c75 6465 3c73 7464 696f 2e68  #include<stdio.h\n00000010: 3e0a                                     >.\n" },
+  { input: str3, params: {html:true}, result: "<div class='hexy'>\n"+
+                                              "<div class='00000000 even'>00000000: 2369 6e63 6c75 6465 3c73 7464 696f 2e68  #include&lt;stdio.h</div>\n"+
+                                              "<div class='00000010  odd'>00000010: 3e0a &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &gt;.</div>\n"+
+                                              "</div>\n" },
+  // empties
+  { inputs: ["", undefined, null], params: {}, result: "" },
+  // Number arrays with bytes work, arrays containing values larger that 0xff are truncated ( val & 0xff )
+  { input: arr, params: {}, result: arr_e },
+   // non numerical width
+  { input: arr, params: {width: "something"}, result: arr_e },
+  { input: arr, params: {width: "2"}, result: "00000000: 0102  ..\n00000002: 030f  ..\n" },
+  { input: arr, params: {width: 1}, result: "00000000: 01  .\n00000001: 02  .\n00000002: 03  .\n00000003: 0f  .\n" },
+  // endianness
+  { input: arr, params: {littleEndian: true}, result: "00000000: 0201 0f03                                ....\n" },
+  // alternative base
+  { input: arr, params: {base: 10, format: "twos"}, result: "00000000: 001 002 003 015                                                    ....\n" },
+  // suppression of non-printable characters
+  { input: [ 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0xd2, 0x77, 0x6f, 0x72, 0x6c, 0x64 ], params: {format: "twos", html: true, extendedChs: true}, result: "<div class='hexy'>\n"+
+                                                                                                                                                  "<div class='00000000 even'>00000000: 68 65 6c 6c 6f d2 77 6f 72 6c 64 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; hello&#xd2;world</div>\n"+
+                                                                                                                                                  "</div>\n" },
+// #30
+  { input: [ 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0xd2, 0x77, 0x6f, 0x72, 0x6c, 0x64 ], params: {format: "twos"}, result: "00000000: 68 65 6c 6c 6f d2 77 6f 72 6c 64                   hello.world\n" },
+  { input: [ 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0xd2, 0x77, 0x6f, 0x72, 0x6c, 0x64 ], params: {format: "twos", extendedChs:true}, result: "00000000: 68 65 6c 6c 6f d2 77 6f 72 6c 64                   helloÒworld\n" },
 ]
 
-function check (should, is) {
+var testcase_id = [ 0, 0 ] // some tests have multiple variants (distinguished by the intput).  To make the navigation easier, the tests are numbered as [line.subtest]
+var failed = 0
+var executed = 0
+
+function check(should, is) {
   if (should !== is) {
-    console.log("failed:")
-    console.log(hexy.hexy(should))
-    console.log(hexy.hexy(is))
-    console.log("==")
+    console.log("\x1b[31m       FAILED testcase # " + testcase_id + "\x1b[0m")
+    console.log("   EXPECTED")
     console.log(should)
+    console.log("   ACTUALLY RETURNED")
     console.log(is)
-    return 1
+    console.log("more detailed view of EXPECTED:")
+    console.log(hexy.hexy(should))
+    console.log("more detailed view of ACTUALLY RETURNED:")
+    console.log(hexy.hexy(is))
+    failed++
   }
-  return 0
+  executed++
 }
 
-check (results[0], hexy.hexy(buf))
 
-function p (o) {console.log(o)}
-
-var total, failed;
-total = failed = 0
-for (var i = 0; i!= format.length ; ++i) {
-  failed += check(results[i], hexy.hexy(buf, format[i]))
-  ++total
-  failed += check(results[i], hexy.hexy(str, format[i]))
-  ++total
-  failed += check(results[i], hexy.hexy(nums, format[i]))
-  ++total
+for (var tc = 0; tc < testcases.length; tc++) {
+  if ('inputs' in testcases[tc]) {
+    for (var ii = 0; ii < testcases[tc].inputs.length; ii++) {
+      testcase_id = [tc, ii]
+      check(testcases[tc].result, hexy.hexy(testcases[tc].inputs[ii], testcases[tc].params))
+    }
+  } else {
+    testcase_id = tc
+    check(testcases[tc].result, hexy.hexy(testcases[tc].input, testcases[tc].params))
+  }
 }
-
-_00 = String.fromCharCode(0)
-_0000 = _00 + _00
-_08 = String.fromCharCode(8)
-_40 = "@"
-_53 = "S"
-_5100 = "Q"+_00
-var str2 = _00 + _00 + _08 + _40 + _53 + _00 + _0000 + _5100 + _0000 + _5100 + _0000
-var xxd2 = "00000000: 0000 0840 5300 0000 5100 0000 5100 0000  ...@S...Q...Q...\n"
-
-failed += check(xxd2, hexy.hexy(str2))
-++total
-
-
-str3 = "#include<stdio.h>\n"
-xxd3 = "00000000: 2369 6e63 6c75 6465 3c73 7464 696f 2e68  #include<stdio.h\n"+
-       "00000010: 3e0a                                     >.\n"
-
-failed += check(xxd3, hexy.hexy(str3))
-++total
-
-xxd4 = "<div class='hexy'>\n"+
-       "<div class='00000000 even'>00000000: 2369 6e63 6c75 6465 3c73 7464 696f 2e68  #include&lt;stdio.h</div>\n"+
-       "<div class='00000010  odd'>00000010: 3e0a &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &gt;.</div>\n"+
-       "</div>\n"
-
-failed += check(xxd4, hexy.hexy(str3, {html:true}))
-++total
-
-// empty string/buffer/nil etc should return empty string, as does xxd
-var empties = ["", undefined, null]
-empties.forEach( function (empty) {
-  failed += check("", hexy.hexy(empty))
-  ++total
-})
-
-// Number arrays with bytes work, arrays containing values larger that 
-// 0xff are truncated ( val & 0xff )
-var arr = [0x1001, 0x2002, 0x3003, 0xf00f]
-var arr_e = "00000000: 0102 030f                                ....\n"
-failed += check(arr_e, hexy.hexy(arr))
-++total
-
-// non numerical width
-failed += check(arr_e, hexy.hexy(arr, {width: "something"}))
-++total
-
-arr_e = "00000000: 0102  ..\n00000002: 030f  ..\n"
-
-failed += check(arr_e, hexy.hexy(arr, {width: "2"}))
-++total
-
-arr_e = "00000000: 01  .\n00000001: 02  .\n00000002: 03  .\n00000003: 0f  .\n"
-
-failed += check(arr_e, hexy.hexy(arr, {width: 1}))
-++total
 
 function checkVersion () {
   const fs = require("fs") 
   const pkg = fs.readFileSync("package.json") 
   const version = JSON.parse(pkg).version
 
-  failed += check(version, hexy.Hexy.VERSION)
-  ++total
+  check(version, hexy.Hexy.VERSION)
 }
 checkVersion()
 
-
-p("failed: "+failed+" of "+total)
+console.log("Executed: " + executed + ", Failed: " + failed)
 
 if (failed != 0) {
   process.exit(1)
 }
-
-
