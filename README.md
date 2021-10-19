@@ -208,12 +208,6 @@ console.log(hexy(buff));
 * formating consistency: slightly reformatted code around my changes
 * general readability: flipped some `switch()` statements around to handle most common cases on top
 * a bit more order in the test
-* benchmarked the changes by runnng the test suite in loop 100 of times (before -> after) on the same set of tests.  Some results:
-  Windows 10 @Ryzen 5800x:
-  Windows 10 @Intel i5-7660:
-  Linux @Intel i7-3667U 2GHz:
-  Linux R-Pi 4:
-  MacBook Air @M1: 0.0297sec -> 0.0292sec
 
  ### 0.3.2
  

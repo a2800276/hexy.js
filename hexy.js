@@ -232,13 +232,13 @@
 
 (function (arg) {
 
-var hexy = function (buffer, config) {
-  var h = new Hexy(buffer, config)
+var hexy = function(buffer, config) {
+  const h = new Hexy(buffer, config)
   return h.toString()
 }
 
-var Hexy = function (buffer, config) {
-  var self = this
+var Hexy = function(buffer, config) {
+  const self = this
   const MAX_ADDRESS_LENGTH = 8 // TODO: might want to calculate
  	
   // if we have a Buffer class, convert
@@ -251,19 +251,17 @@ var Hexy = function (buffer, config) {
   buffer = buffer || []
   config = config || {}
  
-  self.buffer    = buffer // magic string conversion here?
+  self.buffer         = buffer // magic string conversion here?
   self.bytes_per_line = parseInt(config.width) || 16 // formerly `width`
-  self.numbering = config.numbering == "none"  ? "none" : "hex_bytes"
-   
+  self.numbering      = config.numbering == "none" ? "none" : "hex_bytes"
+
+  self.bytes_per_group = 2  // by default (not handled below) "fours" will fold into `bytes_per_group == 2`
   switch (config.format) {
     case "none":
       self.bytes_per_group = 0 // one byte per group, but no delimiters
       break
     case "twos":
       self.bytes_per_group = 1
-      break
-    default: // "fours" roll in here
-      self.bytes_per_group = 2
       break
     case "eights":
       self.bytes_per_group = 4
@@ -273,18 +271,16 @@ var Hexy = function (buffer, config) {
       break
   }
                                                                                                    
-  self.littleEndian= config.littleEndian|| false
-  self.base        = config.base        || 16
-  self.collapse    = config.collapse
-  self.caps        = config.caps        == "upper" ? "upper" : "lower"
-  self.annotate    = config.annotate    == "none"  ? "none"  : "ascii"
-  self.prefix      = config.prefix      || ""
-  self.indent      = config.indent      || 0
-  self.html        = config.html        || false
-  self.offset      = config.offset      || 0
-  self.length      = config.length      || -1
-  self.extendedChs = config.extendedChs || false
-  
+  self.littleEndian   = config.littleEndian   || false
+  self.base           = config.base           || 16
+  self.caps           = config.caps           == "upper" ? "upper" : "lower"
+  self.annotate       = config.annotate       == "none"  ? "none"  : "ascii"
+  self.prefix         = config.prefix         || ""
+  self.indent         = config.indent         || 0
+  self.html           = config.html           || false
+  self.offset         = config.offset         || 0
+  self.length         = config.length         || -1
+  self.extendedChs    = config.extendedChs    || false
   self.display_offset = config.display_offset || 0
 
   if (self.offset) {
@@ -295,7 +291,7 @@ var Hexy = function (buffer, config) {
 
   if (self.length !== -1) {
     if (self.length <= self.buffer.length) {
-      self.buffer = self.buffer.slice(0,self.length)
+      self.buffer = self.buffer.slice(0, self.length)
     }
   }
 
@@ -317,69 +313,47 @@ var Hexy = function (buffer, config) {
   }
   self.bytes_per_group = Math.min(self.bytes_per_group, self.bytes_per_line)
 
-  this.toString = function () {
+  this.toString = function() {
     var str = ""
+    var addr = self.offset + self.display_offset
+    var odd = false
 
     if (self.html) { str += "<div class='hexy'>\n" }
 
-    // render representation of individual lines:
-    var line_arr = lines()
+    // each `slice` is a single output line:
+    for (var start = 0; start < self.buffer.length; start += self.bytes_per_line) {
+      const end = Math.min(start + self.bytes_per_line, self.buffer.length)
+      const slice = self.buffer.slice(start, end)
 
-    // merge the lines into single string:
-    for (var i = 0; i != line_arr.length; ++i) {
-      var hex_raw = line_arr[i],
-          hex = hex_raw[0],
-          raw = hex_raw[1]
-
-      var addr = i * self.bytes_per_line + self.offset + self.display_offset
       if (self.html) {
-        var odd = i%2 == 0 ? " even" : "  odd"
-        str += "<div class='" + num2str(addr, MAX_ADDRESS_LENGTH, 16) + odd + "'>"
+        str += "<div class='" + num2str(addr, MAX_ADDRESS_LENGTH, 16) + (odd ? "  odd" : " even") + "'>"
+        odd = !odd
       }
-      str += self.prefix 
+      str += self.prefix
 
       // the address column:
       if (self.numbering === "hex_bytes") {
-        str += num2str(addr, MAX_ADDRESS_LENGTH, 16)
-        str += ": "
+        str += num2str(addr, MAX_ADDRESS_LENGTH, 16) + ": "
       }
 
       // the binary representation column:
-      str += rpad(hex, self.hex_line_length)
+      str += hex(slice, self.bytes_per_line, self.bytes_per_group, self.base, self.littleEndian)
 
       // the text representation column:
       if (self.annotate === "ascii") {
-        str += " "
-        str += (self.html ? html_escape(raw) : ascii_escape(raw))
+        const raw = self.buffer.constructor == Array ? String.fromCharCode.apply(self, slice) : slice.toString('latin1')
+        str += " " + (self.html ? html_escape(raw) : ascii_escape(raw))
       }
       str += self.html ? "</div>\n" : "\n"
+      addr += self.bytes_per_line
     }
+
     if (self.html) { str += "</div>\n" }
     return str
   }
 
-  // renders individual lines and returns an array of [hex, ascii] elements -- one per line
-  var lines = function() {
-    var result = []
-    for (var i = 0; i < self.buffer.length; i += self.bytes_per_line) {
-      var begin = i
-      var end   = Math.min(i + self.bytes_per_line, self.buffer.length)
-      var slice = self.buffer.slice(begin, end)
-      var left  = hex(slice, self.bytes_per_line, self.bytes_per_group, self.base, self.littleEndian)
-      var right = slice.toString('binary')
-      if (self.caps === "upper") {
-        left = left.toUpperCase()
-      }
-      if (self.buffer.constructor == Array) {
-        right = String.fromCharCode.apply(self, slice)
-      }
-      result.push([left, right]) // romanp: TODO: see if this can be injected directly into a string
-    }
-    return result
-  }
-
   // renders the binary representation of individual line
-  var hex = function(buffer, bytes_per_line, bytes_per_group, base, littleEndian) {
+  function hex(buffer, bytes_per_line, bytes_per_group, base, littleEndian) {
     var str = ""
     const delimiter = bytes_per_group == 0 ? "" : " "
     const group_len = maxnumberlen(bytes_per_group, base)
@@ -388,16 +362,20 @@ var Hexy = function (buffer, config) {
       bytes_per_group = 1
     }
     const start = littleEndian ? bytes_per_group - 1 : 0
-    const end = littleEndian ? -1 : bytes_per_group
-    const step = littleEndian ? -1 : 1
+    const end   = littleEndian ? -1 : bytes_per_group
+    const step  = littleEndian ? -1 : 1
     for (var group = 0; group < buffer.length / bytes_per_group; ++group) {
-      var val = BigInt(0)
+      var val = bytes_per_group < 4 ? 0 : BigInt(0)
       for (var ii = start; ii != end; ii += step) {
         const i = group * bytes_per_group + ii
         if (i >= buffer.length) { // not rendering dangling bytes.  TODO: render them as smaller grouping
           break
         }
-        val = val * 256n + BigInt(buffer.constructor == String ? buffer.codePointAt(i) : buffer[i])
+        if (bytes_per_group < 4) {
+          val = val * 256 + ((buffer.constructor == String ? buffer.codePointAt(i) : buffer[i]) & 0xff)
+        } else {
+          val = val * 256n + BigInt((buffer.constructor == String ? buffer.codePointAt(i) : buffer[i]) & 0xff)
+        }
       }
       const text = val.toString(base)
       for (var c = 0; c < group_len - text.length; c++) {
@@ -405,48 +383,51 @@ var Hexy = function (buffer, config) {
       }
       str += text
       str += delimiter
+      if (self.caps === "upper") {
+        str = str.toUpperCase()
+      }
     }
     if (buffer.length < bytes_per_line) {
       str += (self.html ? "&nbsp;": " ").repeat(padlen)
     }
+    str = rpad(str, self.hex_line_length)
     return str
   }
 
-  // converts a number to a string and pads it with '0' on the right up to requested length
-  var num2str = function(b, len, base) {
-    var s = b.toString(base)
-    while (s.length < len) {
-      s = "0" + s
-    }
-    return s
+  // converts a number to a string and pads it with '0' on the left, up to requested length
+  function num2str(b, len, base) {
+    const s = b.toString(base)
+    return "0".repeat(len - s.length) + s
   }
 
-  var rpad = function(s, len) {
+  function rpad(s, len) {
     const to_add = len - s.length - 1
-
     if (to_add > 0) {
       s += (self.html ? "&nbsp;" : " ").repeat(to_add)
     }
     return s
   }
 
-  var ascii_escape = function(str) {
-    return str.replace(self.extendedChs ? /[\u0000-\u001f]/g: /[^\u0020-\u007f]/g, ".")
+  const ALL_EXCEPT_PRINTABLE_LATIN = /[^\x20-\x7f]/g
+  const CONTROL_CHARACTERS_ONLY = /[\x00-\x1f]/g
+
+  function ascii_escape(str) {
+    return str.replace(self.extendedChs ? CONTROL_CHARACTERS_ONLY : ALL_EXCEPT_PRINTABLE_LATIN, ".")
   }
 
-  var html_escape = function(str) {
-    str = str.split("&").join("&amp;")
-    str = str.split("<").join("&lt;")
-    str = str.split(">").join("&gt;")
+  function html_escape(str) {
+    str = str.replace(/&/g, "&amp;") // `replace()` is measurably faster than `split().join()` on M1
+    str = str.replace(/</g, "&lt;")
+    str = str.replace(/>/g, "&gt;")
     if (self.extendedChs) {
       str = str.replace(/\'/g, "&apos;")
       str = str.replace(/\"/g, "&quot;")
-      str = str.replace(/[^\u0020-\u007f]/g, function(ch) {
+      str = str.replace(ALL_EXCEPT_PRINTABLE_LATIN, function(ch) {
         ch = ch.codePointAt(0)
         return "&#x" + ch.toString(16) + ";"
       })
     } else {
-      str = str.replace(/[^\u0020-\u007f]/g, ".")
+      str = str.replace(ALL_EXCEPT_PRINTABLE_LATIN, ".")
     }
     return str
   }
