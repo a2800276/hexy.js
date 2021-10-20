@@ -1,4 +1,4 @@
-[![build status](https://api.travis-ci.com/a2800276/hexy.js.svg)](https://app.travis-ci.com/github/a2800276/hexy.js)
+[![build status](https://app.travis-ci.com/rom-p/hexy.js.svg)](https://app.travis-ci.com/github/rom-p/hexy.js)
 
  # hexy.js -- utility to create hex dumps 
  
@@ -166,7 +166,7 @@ console.log(hexy(buff));
 
  Deno support would also be nice.
  
- Better testing for browser use.
+ **DONE** Better testing for browser use.
  
   
  ## Thanks
@@ -199,15 +199,24 @@ console.log(hexy(buff));
     The 8-byte grouping is enabled by passing "sixteens" into `config.format`
 * introduced ability to display the binary data in bases other than hexadecimal: binary, octal, decimal and hexadecimal
     The base is controlled by passing 2, 8, 10 or 16 into `config.base`
-* introduced ability to control if non-printable characters are displayed or replaced with '.'.
+* introduced ability to control if non-printable characters are displayed or replaced with `'.'`.
     To display extended characters, pass `config.extendedChs: true`. The exact behavior of this flag depends on the output type, html or not:
     In `config.html: true` mode, all the characters can be displayed, even 0-0x20 have visual represenation.
     In `config.html: false` mode, only the extended characters beyond the end of standard ASCII are displayed.
 * implemented and exported `maxnumberlen()` -- calculates how many characters can a number occupy
-* nit: removed some of unused variables
-* formating consistency: slightly reformatted code around my changes
-* general readability: flipped some `switch()` statements around to handle most common cases on top
-* a bit more order in the test
+* several tweaks improved performance by ~15-30%, depending on the platform (compared to v.0.3.2).
+* a bit more order in the node.js tests:
+  * the tests are read from an uniform table.  This allows enumerating the testcases, as well as sharing them with browser tests
+  * added ability to do performance tests -- just run `time node test perf`
+* enabled browser tests:
+  * visual summary with details of all the tests, collapsable and color-coded
+  * same set of testcases as in node.js
+  * all tests pass now.  Found and fixed a bug that was present in all browsers where they handle bigger-than-byte data differently compared to node.js
+* restricted the set of node.js versions and browsers (now require support of `BigInt`: Node.JS 10.4+, browsers since 2018-2020)
+* the travis is passing now
+* nits:
+  * removed some of unused variables
+  * increased formating consistency
 
  ### 0.3.2
  

@@ -1,9 +1,5 @@
 <!doctype html>
 <html>
-<!-- 
-  Extremely rudimentary test for browser support.
-  Open this file in a browser and see if it works.
--->
 <head>
   <style>
     body {
@@ -65,6 +61,19 @@
       border-color: red;
       color: red;
     }
+    .space {
+      color: lightgray;
+    }
+    .key {
+      font-weight: bold;
+      font-style: italic;
+    }
+    .string {
+      color: green;
+    }
+    .number, .boolean, .null {
+      color: blue;
+    }
   </style>
   <script src="hexy.js"></script>
   <script src="test/testcases.js"></script>
@@ -75,16 +84,52 @@
     var testcase_id = [ 0, 0 ];
     var executed = 0, failed = 0;
 
+    function prettyPrintString(str) {
+      return str.replace(/\n/g, '<br/>')
+                .replace(/ /g, '<span class="space">.</span>');
+    }
+    function prettyPrintObject(object) {
+      const json = JSON.stringify(object, undefined, 1)
+                        .replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;')
+                        .replace(/{/g, '{<br>')
+                        .replace(/}/g, '<br>}')
+                        .replace(/,/g, ',<br>');
+      return json.replace(/("(\u[a-zA-Z0-9]{4}|\[^u]|[^\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
+        function (match) {
+          var cls = 'number';
+          if (/^"/.test(match)) {
+            if (/:$/.test(match)) {
+              cls = 'key';
+            } else {
+              cls = 'string';
+            }
+          } else if (/true|false/.test(match)) {
+            cls = 'boolean';
+          } else if (/null/.test(match)) {
+            cls = 'null';
+          }
+          return '<span class="' + cls + '">' + match + '</span>';
+        });
+    }
+
+    function prettyPrint(obj) {
+      return typeof obj === 'string'
+              ? '"<span class="string">' + prettyPrintString(obj) + '</span>"'
+              : prettyPrintObject(obj);
+    }
+
     function check(input, flags, expected, result) {
       var testcase_node = template_node.content.cloneNode(true);
       var whole = testcase_node.querySelector(".whole");
       var header = testcase_node.querySelector(".header");
       var content = testcase_node.querySelector(".content");
       header.innerHTML = "test " + testcase_id.toString() + ": ";
-      testcase_node.querySelector(".input").innerHTML = input.toString().replace(/\n/g, '<br/>');
-      testcase_node.querySelector(".flags").innerHTML = JSON.stringify(flags);
-      testcase_node.querySelector(".expected").innerHTML = expected.replace(/\n/g, '<br/>');
-      testcase_node.querySelector(".result").innerHTML = result.replace(/\n/g, '<br/>');
+      testcase_node.querySelector(".input").innerHTML = prettyPrint(input);
+      testcase_node.querySelector(".flags").innerHTML = prettyPrintObject(flags);
+      testcase_node.querySelector(".expected").innerHTML = prettyPrintString(expected);
+      testcase_node.querySelector(".result").innerHTML = prettyPrintString(result);
       if (expected !== result) {
         failed++;
         header.innerHTML += "FAILURE";
