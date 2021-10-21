@@ -3,6 +3,13 @@ const nums = [ 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 97, 98, 99, 100,
   101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114,
   115, 116, 117, 118, 119, 120, 122, 121 ];
 
+var bundle = null;
+if (typeof window === 'undefined') {
+  bundle = [ Buffer.from("0123456789abcdefghijklmnopqrstuvwxzy"), str, nums ]; // this is node.js case
+} else {
+  bundle = [ str, nums ]; // this is browser case: `Buffer` is not the same here
+}
+
 const _00 = String.fromCharCode(0);
 const _0000 = _00 + _00;
 const _08 = String.fromCharCode(8);
@@ -93,25 +100,25 @@ const results = [
 const testcases = [
 // #0
   { input: str, params: {}, result: results[0] }, // historic first testcase will always remain #0
-  { inputs: [str, nums], params: {}, result: results[0] },
-  { inputs: [str, nums], params: {caps:"upper"}, result: results[1] },
-  { inputs: [str, nums], params: {width:8}, result: results[2] },
-  { inputs: [str, nums], params: {width:8, caps:"upper"}, result: results[3] },
-  { inputs: [str, nums], params: {numbering:"none"}, result: results[4] },
-  { inputs: [str, nums], params: {format:"twos"}, result: results[5] },
-  { inputs: [str, nums], params: {format:"eights"}, result: results[6] },
-  { inputs: [str, nums], params: {format:"none"}, result: results[7] },
-  { inputs: [str, nums], params: {annotate:"none"}, result: results[8] },
+  { inputs: bundle, params: {}, result: results[0] },
+  { inputs: bundle, params: {caps:"upper"}, result: results[1] },
+  { inputs: bundle, params: {width:8}, result: results[2] },
+  { inputs: bundle, params: {width:8, caps:"upper"}, result: results[3] },
+  { inputs: bundle, params: {numbering:"none"}, result: results[4] },
+  { inputs: bundle, params: {format:"twos"}, result: results[5] },
+  { inputs: bundle, params: {format:"eights"}, result: results[6] },
+  { inputs: bundle, params: {format:"none"}, result: results[7] },
+  { inputs: bundle, params: {annotate:"none"}, result: results[8] },
 // #10
-  { inputs: [str, nums], params: {prefix:"-"}, result: results[9] },
-  { inputs: [str, nums], params: {indent:"5"}, result: results[10] },
-  { inputs: [str, nums], params: {caps:"upper", numbering:"none", annotate:"none", prefix:"dingdong", format:"twos"}, result: results[11] },
-  { inputs: [str, nums], params: {html:true}, result: results[12] },
-  { inputs: [str, nums], params: {offset:10}, result: results[13] },
-  { inputs: [str, nums], params: {offset:10, length:10}, result: results[14] },
-  { inputs: [str, nums], params: {offset:10, length:10, html:true}, result: results[15] },
-  { inputs: [str, nums], params: {display_offset:10}, result: results[16] },
-  { inputs: [str, nums], params: {display_offset:10, offset:10, length:10}, result: results[17] },
+  { inputs: bundle, params: {prefix:"-"}, result: results[9] },
+  { inputs: bundle, params: {indent:"5"}, result: results[10] },
+  { inputs: bundle, params: {caps:"upper", numbering:"none", annotate:"none", prefix:"dingdong", format:"twos"}, result: results[11] },
+  { inputs: bundle, params: {html:true}, result: results[12] },
+  { inputs: bundle, params: {offset:10}, result: results[13] },
+  { inputs: bundle, params: {offset:10, length:10}, result: results[14] },
+  { inputs: bundle, params: {offset:10, length:10, html:true}, result: results[15] },
+  { inputs: bundle, params: {display_offset:10}, result: results[16] },
+  { inputs: bundle, params: {display_offset:10, offset:10, length:10}, result: results[17] },
   { input: _00 + _00 + _08 + _40 + _53 + _00 + _0000 + _5100 + _0000 + _5100 + _0000, params: {}, result: "00000000: 0000 0840 5300 0000 5100 0000 5100 0000  ...@S...Q...Q...\n" },
 // #20
   { input: str3, params: {}, result: "00000000: 2369 6e63 6c75 6465 3c73 7464 696f 2e68  #include<stdio.h\n00000010: 3e0a                                     >.\n" },
@@ -129,8 +136,8 @@ const testcases = [
   { input: arr, params: {width: 1}, result: "00000000: 01  .\n00000001: 02  .\n00000002: 03  .\n00000003: 0f  .\n" },
   // endianness
   { input: arr, params: {littleEndian: true}, result: "00000000: 0201 0f03                                ....\n" },
-  // alternative base
-  { input: arr, params: {base: 10, format: "twos"}, result: "00000000: 001 002 003 015                                                    ....\n" },
+  // alternative radix
+  { input: arr, params: {radix: 10, format: "twos"}, result: "00000000: 001 002 003 015                                                    ....\n" },
   // suppression of non-printable characters
   { input: [ 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0xd2, 0x77, 0x6f, 0x72, 0x6c, 0x64 ], params: {format: "twos", html: true, extendedChs: true}, result: "<div class='hexy'>\n"+
                                                                                                                                                   "<div class='00000000 even'>00000000: 68 65 6c 6c 6f d2 77 6f 72 6c 64 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; hello&#xd2;world</div>\n"+
@@ -139,5 +146,6 @@ const testcases = [
   { input: [ 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0xd2, 0x77, 0x6f, 0x72, 0x6c, 0x64 ], params: {format: "twos"}, result: "00000000: 68 65 6c 6c 6f d2 77 6f 72 6c 64                   hello.world\n" },
   { input: [ 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0xd2, 0x77, 0x6f, 0x72, 0x6c, 0x64 ], params: {format: "twos", extendedChs:true}, result: "00000000: 68 65 6c 6c 6f d2 77 6f 72 6c 64                   hello" + "\u00d2" + "world\n" },
 ];
-
-module.exports = testcases;
+if (typeof window === 'undefined') {
+  module.exports = testcases;
+}

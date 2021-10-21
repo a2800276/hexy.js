@@ -4,6 +4,18 @@ const testcases = require("./test/testcases.js")
 var testcase_id = [ 0, 0 ] // some tests have multiple variants (distinguished by the intput).  To make the navigation easier, the tests are numbered as [line.subtest]
 var failed = 0
 var executed = 0
+var iterations = 1
+if (process.argv.includes("perf")) {
+  iterations = 100000
+}
+var execute_first_X_tests = null
+if (process.argv.includes("baseline")) { // baselining against version 0.3.2, which 
+  execute_first_X_tests = 29             // had 29 test lines (65 testcases total), that
+}                                        // are preserved at the top of the list of tests
+var verbose = false
+if (process.argv.includes("-v")) {
+  verbose = true
+}
 
 function check(should, is) {
   if (should !== is) {
@@ -17,16 +29,14 @@ function check(should, is) {
     console.log("more detailed view of ACTUALLY RETURNED:")
     console.log(hexy.hexy(is))
     failed++
+  } else if (verbose) {
+    console.log(is)
   }
   executed++
 }
 
-var iterations = 1
-if (process.argv.includes("perf")) {
-  iterations = 100000
-}
 for (var rep = 0; rep < iterations; rep++) {
-  for (var tc = 0; tc < testcases.length; tc++) {
+  for (var tc = 0; tc < (execute_first_X_tests || testcases.length); tc++) {
     if ('inputs' in testcases[tc]) {
       for (var ii = 0; ii < testcases[tc].inputs.length; ii++) {
         testcase_id = [tc, ii]

@@ -53,11 +53,11 @@
       color: black;
       font-family: monospace;
     }
-    .success {
+    .pass {
       color: green;
       border-color: green;
     }
-    .failure {
+    .fail {
       border-color: red;
       color: red;
     }
@@ -132,11 +132,11 @@
       testcase_node.querySelector(".result").innerHTML = prettyPrintString(result);
       if (expected !== result) {
         failed++;
-        header.innerHTML += "FAILURE";
-        whole.className += " failure";
+        header.innerHTML += "FAIL";
+        whole.className += " fail";
       } else {
-        header.innerHTML += "SUCCESS";
-        whole.className += " success";
+        header.innerHTML += "PASS";
+        whole.className += " pass";
         content.style.display = "none";
       }
       test_root.appendChild(testcase_node);
@@ -183,7 +183,7 @@
 
   <template id='testcase'>
     <fieldset class='whole' onclick='collapse();'>
-      <legend class='header'>SUCCESS</legend>
+      <legend class='header'>PASS</legend>
       <div class='content'> <!-- this div collapses-->
         <fieldset class='input-box box'>
           <legend>input</legend>

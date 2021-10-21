@@ -65,7 +65,7 @@
 //var format = {}
 //    format.width = width // how many bytes per line, default 16
 //    format.numbering = n // ["hex_bytes" | "none"],  default "hex_bytes"
-//    format.base = b      // [2, 8, 10, 16], the base (radix) for numeral representation
+//    format.radix = b     // [2, 8, 10, 16], the radix for numeral representation
 //                         // for the right column,    default 16
 //    format.format = f    // ["twos"|"fours"|"eights"|"sixteens"|"none"], number of nibbles per group
 //                         //                          default "fours"
@@ -198,7 +198,7 @@
 // * introduced ability to group 8 bytes (16 nibbles).  With prevalence of 64-bit computing, the 64-bit (i.e. 8-byte) data is getting more and more popular.
 //     The 8-byte grouping is enabled by passing "sixteens" into `config.format`
 // * introduced ability to display the binary data in bases other than hexadecimal: binary, octal, decimal and hexadecimal
-//     The base is controlled by passing 2, 8, 10 or 16 into `config.base`
+//     The radix is controlled by passing 2, 8, 10 or 16 into `config.radix`
 // * introduced ability to control if non-printable characters are displayed or replaced with `'.'`.
 //     To display extended characters, pass `config.extendedChs: true`. The exact behavior of this flag depends on the output type, html or not:
 //     In `config.html: true` mode, all the characters can be displayed, even 0-0x20 have visual represenation.
@@ -212,6 +212,7 @@
 //   * visual summary with details of all the tests, collapsable and color-coded
 //   * same set of testcases as in node.js
 //   * all tests pass now.  Found and fixed a bug that was present in all browsers where they handle bigger-than-byte data differently compared to node.js
+// * added visual test html page (view.html) -- lets users load a file to show its binary representation
 // * restricted the set of node.js versions and browsers (now require support of `BigInt`: Node.JS 10.4+, browsers since 2018-2020)
 // * the travis is passing now
 //
@@ -246,7 +247,7 @@ var hexy = function(buffer, config) {
 var Hexy = function(buffer, config) {
   const self = this
   const MAX_ADDRESS_LENGTH = 8 // TODO: might want to calculate
- 	
+
   // if we have a Buffer class, convert
   if (typeof Buffer !== 'undefined') {
     buffer = (Buffer.isBuffer(buffer) && buffer) 
@@ -278,7 +279,7 @@ var Hexy = function(buffer, config) {
   }
                                                                                                    
   self.littleEndian   = config.littleEndian   || false
-  self.base           = config.base           || 16
+  self.radix          = config.radix          || 16
   self.caps           = config.caps           == "upper" ? "upper" : "lower"
   self.annotate       = config.annotate       == "none"  ? "none"  : "ascii"
   self.prefix         = config.prefix         || ""
@@ -303,7 +304,8 @@ var Hexy = function(buffer, config) {
 
   self.prefix = (self.html ? "&nbsp;" : " ").repeat(self.indent) + self.prefix
 
-  self.hex_line_length = (maxnumberlen(self.bytes_per_group, self.base)) * self.bytes_per_line / Math.max(self.bytes_per_group, 1)
+  self.hex_line_length = (maxnumberlen(self.bytes_per_group, self.radix)) * self.bytes_per_line
+                        / Math.max(self.bytes_per_group, 1)
   switch (self.bytes_per_group) { // the original code (now documented in the tests),
       case 8:                     // some modes had mode-dependent number of extra spaces at the end of the line
       case 4:
@@ -343,12 +345,22 @@ var Hexy = function(buffer, config) {
       }
 
       // the binary representation column:
-      str += hex(slice, self.bytes_per_line, self.bytes_per_group, self.base, self.littleEndian)
+      str += hex(slice, self.bytes_per_line, self.bytes_per_group, self.radix, self.littleEndian)
 
       // the text representation column:
       if (self.annotate === "ascii") {
-        const raw = self.buffer.constructor == Array ? String.fromCharCode.apply(self, slice) : slice.toString('latin1')
-        str += " " + (self.html ? html_escape(raw) : ascii_escape(raw))
+        var text = ""
+        switch (slice.constructor) {
+        case Array:
+          text = String.fromCharCode.apply(self, slice)
+          break
+        case Uint8Array:
+          slice.forEach(ch => text += String.fromCharCode(ch))
+          break
+        default:
+          text = slice.toString('latin1')
+        }
+        str += " " + (self.html ? html_escape(text) : ascii_escape(text))
       }
       str += self.html ? "</div>\n" : "\n"
       addr += self.bytes_per_line
@@ -359,10 +371,10 @@ var Hexy = function(buffer, config) {
   }
 
   // renders the binary representation of individual line
-  function hex(buffer, bytes_per_line, bytes_per_group, base, littleEndian) {
+  function hex(buffer, bytes_per_line, bytes_per_group, radix, littleEndian) {
     var str = ""
     const delimiter = bytes_per_group == 0 ? "" : " "
-    const group_len = maxnumberlen(bytes_per_group, base)
+    const group_len = maxnumberlen(bytes_per_group, radix)
     const padlen = (bytes_per_line - buffer.length) * (bytes_per_group == 0 ? group_len: (group_len + 1) / bytes_per_group)
     if (bytes_per_group == 0) {
       bytes_per_group = 1
@@ -383,7 +395,7 @@ var Hexy = function(buffer, config) {
           val = val * 256n + BigInt((buffer.constructor == String ? buffer.codePointAt(i) : buffer[i]) & 0xff)
         }
       }
-      const text = val.toString(base)
+      const text = val.toString(radix)
       for (var c = 0; c < group_len - text.length; c++) {
         str += "0"
       }
@@ -401,8 +413,8 @@ var Hexy = function(buffer, config) {
   }
 
   // converts a number to a string and pads it with '0' on the left, up to requested length
-  function num2str(b, len, base) {
-    const s = b.toString(base)
+  function num2str(b, len, radix) {
+    const s = b.toString(radix)
     return "0".repeat(len - s.length) + s
   }
 
@@ -441,12 +453,12 @@ var Hexy = function(buffer, config) {
 
 Hexy.VERSION = "0.3.3"
 
-var maxnumberlen = function(bytes, base) {
+var maxnumberlen = function(bytes, radix) {
   var result = 2
   if (bytes == 0) {
     bytes = 1
   }
-  switch (base) {
+  switch (radix) {
     case 2:       // BIN: 8, 16, 32, 64
       result = bytes * 8
       break

@@ -65,7 +65,7 @@ console.log(hexy.hexy(b))
 var format = {}
     format.width = width // how many bytes per line, default 16
     format.numbering = n // ["hex_bytes" | "none"],  default "hex_bytes"
-    format.base = b      // [2, 8, 10, 16], the base (radix) for numeral representation
+    format.radix = b     // [2, 8, 10, 16], the radix for numeral representation
                          // for the right column,    default 16
     format.format = f    // ["twos"|"fours"|"eights"|"sixteens"|"none"], number of nibbles per group
                          //                          default "fours"
@@ -137,21 +137,8 @@ console.log(hexy(buff));
 ```
 
  ## Browser Support
- 
- Basically eveything should work fine in the browser as well, just
- include hexy.js in a script tag, and you'll get `hexy` and `Hexy` stuck
- to the global object (window).
- 
- Some caveats: "Works fine on my system™". Browser support is 'new' and
- not thoroughly tested (... eh, only on chrome [Version: whatever I'm
- currently running]). Under node, I can generally assume that binary data
- is passed in in a sane fashion using buffers, but plain old Javascript
- doesn't really have any datatypes that can handle bytes gracefully.
- Currently only Strings and arrays containing Number'ish values are
- supported, I'd like to add numeric and typed arrays more explicitly.
- 
- Let me know in case you run into any issues, I'd be happy to find out
- about them.
+ Browser support is fixed (now supports `Array` and `Uint8Array`) in 0.3.3.
+ Please refer to `test.html` for examples.
  
  ## TODOS
  
@@ -197,13 +184,13 @@ console.log(hexy(buff));
     The endiannes can be controlled by passing bool via `littleEndian`, which defaults to `false` to support the behavior of the previous versions
 * introduced ability to group 8 bytes (16 nibbles).  With prevalence of 64-bit computing, the 64-bit (i.e. 8-byte) data is getting more and more popular.
     The 8-byte grouping is enabled by passing "sixteens" into `config.format`
-* introduced ability to display the binary data in bases other than hexadecimal: binary, octal, decimal and hexadecimal
-    The base is controlled by passing 2, 8, 10 or 16 into `config.base`
+* introduced ability to display the binary data in bases (radixes) other than hexadecimal: binary, octal, decimal and hexadecimal
+    The radix is controlled by passing 2, 8, 10 or 16 into `config.radix`
 * introduced ability to control if non-printable characters are displayed or replaced with `'.'`.
     To display extended characters, pass `config.extendedChs: true`. The exact behavior of this flag depends on the output type, html or not:
     In `config.html: true` mode, all the characters can be displayed, even 0-0x20 have visual represenation.
     In `config.html: false` mode, only the extended characters beyond the end of standard ASCII are displayed.
-* implemented and exported `maxnumberlen()` -- calculates how many characters can a number occupy
+* implemented and exported `maxnumberlen()` -- calculates how many characters can a number occupy given bittness and radix
 * several tweaks improved performance by ~15-30%, depending on the platform (compared to v.0.3.2).
 * a bit more order in the node.js tests:
   * the tests are read from an uniform table.  This allows enumerating the testcases, as well as sharing them with browser tests
@@ -212,8 +199,9 @@ console.log(hexy(buff));
   * visual summary with details of all the tests, collapsable and color-coded
   * same set of testcases as in node.js
   * all tests pass now.  Found and fixed a bug that was present in all browsers where they handle bigger-than-byte data differently compared to node.js
-* restricted the set of node.js versions and browsers (now require support of `BigInt`: Node.JS 10.4+, browsers since 2018-2020)
-* the travis is passing now
+* created a static html page to hex display files (view.html)
+* restricted the set of node.js versions and browsers (now requires support of `BigInt`: Node.JS 10.4+, browsers since 2018-2020)
+* the Travis-ci is passing now
 * nits:
   * removed some of unused variables
   * increased formating consistency

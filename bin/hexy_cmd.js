@@ -8,8 +8,12 @@ function usage (mes) {
   console.log("usage bla bal bal");
   console.log("--width     [(16)]                     how many bytes per line")
   console.log("--numbering [(hex_bytes)|none]         prefix current byte count")
-  console.log("--format    [eights|(fours)|twos|none] how many nibbles per group")
+  console.log("--radix     [2|8|10|(16)]              radix to use")
+  console.log("--format    [sixteens|eights|(fours)|twos|none] how many nibbles per group")
+  console.log("--littleEndian                         the data is littleEndian")
+  console.log("--extendedChs                          show more characters as-is")
   console.log("--caps      [(lower)|upper]            case of hex chars")
+  console.log("--html                                 render the output in HTML format")
   console.log("--annotate  [(ascii)|none]             provide ascii annotation")
   console.log("--prefix    [(\"\")|<prefix>]          printed in front of each line")
   console.log("--indent    [(0)|<num>]                number of spaces to indent output")
@@ -22,34 +26,37 @@ function existsFatal(fn) {
     var stat = fs.statSync(fn)
     if (stat.isFile()) {
       return;
-    } 
+    }
   } catch (e) {}
   usage("not a file: "+fn)
 }
+
 function handleArgs () {
-  var format = {}, 
+  var format = {},
       ARGS = [
       "--width",
       "--numbering",
+      "--radix",
       "--format",
+      "--littleEndian",
+      "--extendedChs",
       "--caps",
       "--annotate",
       "--prefix",
       "--indent",
       ]
 
-  var args = process.argv,
-      last = -1
+  var args = process.argv
 
   for (var i=2; i<args.length; ++i) {
     var arg = args[i]
     if ("--help" === arg) {
       usage()
     }
-    if ( -1 === ARGS.indexOf(arg) ) {
+    if (-1 === ARGS.indexOf(arg)) {
       // not a valid flag
       if (args.length-1 === i) {
-        //last arg, could be filename
+        // last arg, could be filename
         existsFatal(arg)
         format.filename = arg
         break;
@@ -58,8 +65,7 @@ function handleArgs () {
       }
     }
     arg = arg.substr(2, arg.length)
-    format[arg] = args[++i] 
-    
+    format[arg] = args[++i]
   }
 
   if (format.width) {
@@ -67,6 +73,18 @@ function handleArgs () {
   }
   if (format.indent) {
     format.indent = parseInt(format.indent, 10)
+  }
+  if (format.radix) {
+    format.radix = parseInt(format.radix, 10)
+  }
+  if (format.html) {
+    format.html = true
+  }
+  if (format.littleEndian) {
+    format.littleEndian = true
+  }
+  if (format.extendedChs) {
+    format.extendedChs = true
   }
   return format
 }
@@ -76,30 +94,27 @@ function handleArgs () {
 ************************************************************************/
 
 var format = handleArgs(),
-    buffer = null,
-    str    = null
+    buffer = null
 
 if (format.filename) {
   buffer = fs.readFileSync(format.filename)
   console.log(hexy.hexy(buffer, format))
 } else {
   var stdin = process.openStdin()
-      stdin.on("data", function(data) {
-        var offset = 0
-        if (buffer) {
-          offset = buffer.length
-          buffer_ = new Buffer(buffer.length + data.length)
-          buffer.copy(buffer_,0,0)
-          buffer = buffer_
-          data.copy(buffer, offset, data.length)
-        } else {
-          buffer = data 
-        }
-      })
+  stdin.on("data", function(data) {
+    var offset = 0
+    if (buffer) {
+      offset = buffer.length
+      buffer_ = new Buffer(buffer.length + data.length)
+      buffer.copy(buffer_,0,0)
+      buffer = buffer_
+      data.copy(buffer, offset, data.length)
+    } else {
+      buffer = data 
+    }
+  })
 
-      stdin.on("end", function(){
-        console.log(hexy.hexy(buffer, format))
-      }) 
+  stdin.on("end", function(){
+    console.log(hexy.hexy(buffer, format))
+  }) 
 }
-
-
