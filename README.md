@@ -1,4 +1,4 @@
-[![build status](https://app.travis-ci.com/rom-p/hexy.js.svg)](https://app.travis-ci.com/github/rom-p/hexy.js)
+[![build status](https://api.travis-ci.com/a2800276/hexy.js.svg)](https://app.travis-ci.com/github/a2800276/hexy.js)
 
  # hexy.js -- utility to create hex dumps 
  

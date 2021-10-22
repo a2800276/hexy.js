@@ -3,9 +3,8 @@
 var hexy = require("../hexy.js"),
     fs   = require("fs")
 
-function usage (mes) {
-  console.log(mes)
-  console.log("usage bla bal bal");
+function usage(mes) {
+  console.log(mes || "usage: " + /[^/\\]*$/.exec(process.argv[1]) + " [options] <filename>");
   console.log("--width     [(16)]                     how many bytes per line")
   console.log("--numbering [(hex_bytes)|none]         prefix current byte count")
   console.log("--radix     [2|8|10|(16)]              radix to use")
@@ -17,7 +16,7 @@ function usage (mes) {
   console.log("--annotate  [(ascii)|none]             provide ascii annotation")
   console.log("--prefix    [(\"\")|<prefix>]          printed in front of each line")
   console.log("--indent    [(0)|<num>]                number of spaces to indent output")
-  console.log("parameter in (parens) are default")
+  console.log("parameters in (parens) are default")
   process.exit(1)
 }
 
@@ -80,12 +79,8 @@ function handleArgs () {
   if (format.html) {
     format.html = true
   }
-  if (format.littleEndian) {
-    format.littleEndian = true
-  }
-  if (format.extendedChs) {
-    format.extendedChs = true
-  }
+  format.littleEndian = format.littleEndian == "true"
+  format.extendedChs = format.extendedChs == "true"
   return format
 }
 

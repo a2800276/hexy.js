@@ -7,23 +7,33 @@
       margin: 0;
       overflow: hidden;
       font-family: sans-serif;
+      font-weight: 300;
+      font-size: small;
+      line-height: 1.4;
+    }
+    header, section, footer {
+      display: flex;
+      justify-content: center;
     }
     header, footer {
       background-color: #404040;
       color: #d0d0d0;
-      display: flex;
       width: 100%;
+    }
+    header {
+      flex: 0 1 auto;
     }
     footer {
       position: fixed;
       bottom: 0px;
+      justify-content: right;
     }
     section {
-      height: 100%;
-      overflow: auto;
-      text-align: center;
+      flex: 1 1 auto;
     }
     textarea {
+      display: block;
+      margin: 0;
       font-family: monospace;
     }
   </style>
@@ -34,7 +44,7 @@
 
     function readFile() {
       current_file = event.target.files[0];
-      dump = document.querySelector(".dump");
+      hexdata = document.querySelector(".hexdata");
       update();
     }
 
@@ -53,13 +63,21 @@
       reader.onload = function() {
         const data = reader.result;
         const array = new Uint8Array(data);
-        dump.rows = (array.length + 15) / 16;
-        dump.value = hexy(array, fmt);
+        hexdata.rows = (array.length + 15) / 16;
+        hexdata.value = hexy(array, fmt);
       };
       reader.readAsArrayBuffer(current_file);
     }
 
+    function pageResized() {
+      const header = document.getElementsByTagName('header')[0];
+      const footer = document.getElementsByTagName('footer')[0];
+      const section = document.getElementsByTagName('section')[0];
+      section.style.height = (window.innerHeight - header.offsetHeight - footer.offsetHeight) + "px";
+    }
+
     function pageLoaded() {
+      pageResized();
       const inputs = document.getElementsByTagName('input');
       for (var ii = 0; ii < inputs.length; ii++) {
         inputs[ii].addEventListener("change", update);
@@ -68,7 +86,7 @@
 </script>
 </head>
 
-<body onload='pageLoaded();'>
+<body onload='pageLoaded();' onresize='pageResized();'>
   <header>
     <fieldset class='box'>
       <legend>file to view</legend>
@@ -134,8 +152,8 @@
   </header>
 
   <section>
-    <textarea cols='80' class='dump'></textarea>
-  <section>
+    <textarea cols='80' class='hexdata'></textarea>
+  </section>
 
   <footer>
   uses hexy.js library from <a href='https://github.com/a2800276/hexy.js'>https://github.com/a2800276/hexy.js</a>

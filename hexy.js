@@ -192,28 +192,19 @@
 //
 // ### 0.3.3
 // 
-// * introduced the concept of endiannes (googleable and wikiable).  Before this change, the code assumed that the displayed data is big-endian.
-//     However, most file formats and most CPU architectures are little-endian.  So, introduced the support for it.
-//     The endiannes can be controlled by passing bool via `littleEndian`, which defaults to `false` to support the behavior of the previous versions
-// * introduced ability to group 8 bytes (16 nibbles).  With prevalence of 64-bit computing, the 64-bit (i.e. 8-byte) data is getting more and more popular.
-//     The 8-byte grouping is enabled by passing "sixteens" into `config.format`
-// * introduced ability to display the binary data in bases other than hexadecimal: binary, octal, decimal and hexadecimal
-//     The radix is controlled by passing 2, 8, 10 or 16 into `config.radix`
-// * introduced ability to control if non-printable characters are displayed or replaced with `'.'`.
-//     To display extended characters, pass `config.extendedChs: true`. The exact behavior of this flag depends on the output type, html or not:
-//     In `config.html: true` mode, all the characters can be displayed, even 0-0x20 have visual represenation.
-//     In `config.html: false` mode, only the extended characters beyond the end of standard ASCII are displayed.
-// * implemented and exported `maxnumberlen()` -- calculates how many characters can a number occupy
-// * several tweaks improved performance by ~15-30%, depending on the platform (compared to v.0.3.2).
-// * a bit more order in the node.js tests:
-//   * the tests are read from an uniform table.  This allows enumerating the testcases, as well as sharing them with browser tests
-//   * added ability to do performance tests -- just run `time node test perf`
-// * enabled browser tests:
-//   * visual summary with details of all the tests, collapsable and color-coded
-//   * same set of testcases as in node.js
-//   * all tests pass now.  Found and fixed a bug that was present in all browsers where they handle bigger-than-byte data differently compared to node.js
-// * added visual test html page (view.html) -- lets users load a file to show its binary representation
-// * restricted the set of node.js versions and browsers (now require support of `BigInt`: Node.JS 10.4+, browsers since 2018-2020)
+// * added endianness (BE and LE)
+// * added radix (HEX, DEC, OCT and BIN)
+// * added 16-nibble (8 byte) groups
+// * added option to display more non-lower-ascii chars
+// * toString() can now accept Uint8Array -- the natural way
+//   of reading files and streams in browsers
+// * implemented and exported `maxnumberlen()`
+// * performance += { 15-30% }
+// * Node.js tests ++
+// * created browser tests
+// * created static html demo page (view.html)
+// * restricted the set of node.js versions and browsers:
+//   (now require support of `BigInt`: Node.JS 10.4+, browsers since 2018-2020)
 // * the travis is passing now
 //
 // ### 0.3.2
@@ -371,7 +362,7 @@ var Hexy = function(buffer, config) {
   }
 
   // renders the binary representation of individual line
-  function hex(buffer, bytes_per_line, bytes_per_group, radix, littleEndian) {
+  var hex = function(buffer, bytes_per_line, bytes_per_group, radix, littleEndian) {
     var str = ""
     const delimiter = bytes_per_group == 0 ? "" : " "
     const group_len = maxnumberlen(bytes_per_group, radix)
@@ -413,12 +404,12 @@ var Hexy = function(buffer, config) {
   }
 
   // converts a number to a string and pads it with '0' on the left, up to requested length
-  function num2str(b, len, radix) {
+  var num2str = function(b, len, radix) {
     const s = b.toString(radix)
     return "0".repeat(len - s.length) + s
   }
 
-  function rpad(s, len) {
+  var rpad = function(s, len) {
     const to_add = len - s.length - 1
     if (to_add > 0) {
       s += (self.html ? "&nbsp;" : " ").repeat(to_add)
@@ -429,12 +420,12 @@ var Hexy = function(buffer, config) {
   const ALL_EXCEPT_PRINTABLE_LATIN = /[^\x20-\x7f]/g
   const CONTROL_CHARACTERS_ONLY = /[\x00-\x1f]/g
 
-  function ascii_escape(str) {
+  var ascii_escape = function(str) {
     return str.replace(self.extendedChs ? CONTROL_CHARACTERS_ONLY : ALL_EXCEPT_PRINTABLE_LATIN, ".")
   }
 
-  function html_escape(str) {
-    str = str.replace(/&/g, "&amp;") // `replace()` is measurably faster than `split().join()` on M1
+  var html_escape = function(str) {
+    str = str.replace(/&/g, "&amp;") // `replace()` is measurably faster than `split().join()` in Node.js v.*
     str = str.replace(/</g, "&lt;")
     str = str.replace(/>/g, "&gt;")
     if (self.extendedChs) {
