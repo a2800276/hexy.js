@@ -1,0 +1,162 @@
+<!doctype html>
+<html>
+<head>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      font-family: sans-serif;
+      font-weight: 300;
+      font-size: small;
+      line-height: 1.4;
+    }
+    header, section, footer {
+      display: flex;
+      justify-content: center;
+    }
+    header, footer {
+      background-color: #404040;
+      color: #d0d0d0;
+      width: 100%;
+    }
+    header {
+      flex: 0 1 auto;
+    }
+    footer {
+      position: fixed;
+      bottom: 0px;
+      justify-content: right;
+    }
+    section {
+      flex: 1 1 auto;
+    }
+    textarea {
+      display: block;
+      margin: 0;
+      font-family: monospace;
+    }
+  </style>
+  <script src="hexy.js"></script>
+  <script src="test/testcases.js"></script>
+  <script type="text/javascript">
+    var current_file = null;
+
+    function readFile() {
+      current_file = event.target.files[0];
+      hexdata = document.querySelector(".hexdata");
+      update();
+    }
+
+    function update() {
+      const fmt = {
+        numbering:    document.getElementById('address').checked ? 'hex_bytes' : 'none',
+        format:       document.querySelector('input[name="format"]:checked').value,
+        littleEndian: document.querySelector('input[name="littleEndian"]:checked').value === 'true',
+        radix:        parseInt(document.querySelector('input[name="radix"]:checked').value),
+        caps:         document.getElementById('caps').checked ? 'upper' : 'lower',
+        html:         document.getElementById('html').checked,
+        extendedChs:  document.getElementById('extendedChs').checked,
+      };
+      console.log(fmt);
+      const reader = new FileReader();
+      reader.onload = function() {
+        const data = reader.result;
+        const array = new Uint8Array(data);
+        hexdata.rows = (array.length + 15) / 16;
+        hexdata.value = hexy(array, fmt);
+      };
+      reader.readAsArrayBuffer(current_file);
+    }
+
+    function pageResized() {
+      const header = document.getElementsByTagName('header')[0];
+      const footer = document.getElementsByTagName('footer')[0];
+      const section = document.getElementsByTagName('section')[0];
+      section.style.height = (window.innerHeight - header.offsetHeight - footer.offsetHeight) + "px";
+    }
+
+    function pageLoaded() {
+      pageResized();
+      const inputs = document.getElementsByTagName('input');
+      for (var ii = 0; ii < inputs.length; ii++) {
+        inputs[ii].addEventListener("change", update);
+      }
+    }
+</script>
+</head>
+
+<body onload='pageLoaded();' onresize='pageResized();'>
+  <header>
+    <fieldset class='box'>
+      <legend>file to view</legend>
+      <div class='filetoview'>
+        <input type='file' id='binary' name='binary' onchange='readFile();'>
+      </div>
+    </fieldset>
+
+    <fieldset class='box'>
+      <legend>bytes in group</legend>
+      <div class='bytesingroup'>
+        <input type='radio' id='twos' name='format' value='twos' checked>
+        <label for='twos'>1</label><br>
+        <input type='radio' id='fours' name='format' value='fours'>
+        <label for='fours'>2</label><br>
+        <input type='radio' id='eights' name='format' value='eights'>
+        <label for='eights'>4</label><br>
+        <input type='radio' id='sixteens' name='format' value='sixteens'>
+        <label for='sixteens'>8</label><br>
+      </div>
+    </fieldset>
+
+    <fieldset class='box'>
+      <legend>endianness</legend>
+      <div class='endinanness'>
+        <input type='radio' id='LE' name='littleEndian' value='true' checked>
+        <label for='true'>LE</label><br>
+        <input type='radio' id='BE' name='littleEndian' value='false'>
+        <label for='false'>BE</label>
+        </div>
+    </fieldset>
+
+    <fieldset class='box'>
+      <legend>radix</legend>
+      <div class='radix'>
+        <input type='radio' id='bin' name='radix' value='2'>
+        <label for='bin'>2 (BIN)</label><br>
+        <input type='radio' id='oct' name='radix' value='8'>
+        <label for='oct'>8 (OCT)</label><br>
+        <input type='radio' id='dec' name='radix' value='10'>
+        <label for='dec'>10 (DEC)</label><br>
+        <input type='radio' id='hex' name='radix' value='16' checked>
+        <label for='hex'>16 (HEX)</label><br>
+      </div>
+    </fieldset>
+
+    <fieldset class='box'>
+      <legend>misc</legend>
+      <div class='radix'>
+        <input type='checkbox' id='address' checked>
+        <label for='address'>address</label><br>
+
+        <input type='checkbox' id='caps'>
+        <label for='caps'>caps</label><br>
+
+        <input type='checkbox' id='html'>
+        <label for='html'>html</label><br>
+
+        <input type='checkbox' id='extendedChs'>
+        <label for='extendedChs'>show extended chars</label><br>
+      </div>
+    </fieldset>
+  </header>
+
+  <section>
+    <textarea cols='80' class='hexdata'></textarea>
+  </section>
+
+  <footer>
+  uses hexy.js library from <a href='https://github.com/a2800276/hexy.js'>https://github.com/a2800276/hexy.js</a>
+  </footer>
+</body>
+</html>

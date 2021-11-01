@@ -65,16 +65,25 @@
 //var format = {}
 //    format.width = width // how many bytes per line, default 16
 //    format.numbering = n // ["hex_bytes" | "none"],  default "hex_bytes"
-//    format.format = f    // ["eights"|"fours"|"twos"|"none"], how many nibbles per group
+//    format.radix = b     // [2, 8, 10, 16], the radix for numeral representation
+//                         // for the right column,    default 16
+//    format.format = f    // ["twos"|"fours"|"eights"|"sixteens"|"none"], number of nibbles per group
 //                         //                          default "fours"
+//    format.littleEndian = true
+//                         // endiannes of data,       default false
+//                         // counts when number of nibbles is more than "twos",
+//                         // i.e. displaying groups bigger than one byte
+//    format.extendedChs = true
+//                         // allow displaying more characters in the text column
+//                         //                          default false
 //    format.caps = c      // ["lower"|"upper"],       default lower
-//    format.annotate=a    // ["ascii"|"none"], ascii annotation at end of line?
+//    format.annotate = a  // ["ascii"|"none"], ascii annotation at end of line?
 //                         //                          default "ascii"
-//    format.prefix=p      // <string> something pretty to put in front of each line
+//    format.prefix = p    // <string> something pretty to put in front of each line
 //                         //                          default ""
-//    format.indent=i      // <num> number of spaces to indent
+//    format.indent = i    // <num> number of spaces to indent
 //                         //                          default 0
-//    format.html=true     // funky html divs 'n stuff! experimental.
+//    format.html = true   // funky html divs 'n stuff! experimental.
 //                         //                          default: false
 //    format.offset = X    // generate hexdump based on X byte offset
 //                         // into the provided source
@@ -86,7 +95,7 @@
 //                         // add Z to the address prepended to each line
 //                         // (note, even if `offset` is provided, addressing
 //                         // is started at 0)
-//                         //                          default 0                         
+//                         //                          default 0
 //
 //console.log(hexy.hexy(buffer, format))
 //``` 
@@ -96,7 +105,7 @@
 // 
 // ## Installing
 // 
-// Either use `npm` (or whatever caompatible npm thingie people are using
+// Either use `npm` (or whatever compatible npm thingie people are using
 // these days) :
 //   
 //```shell   
@@ -181,6 +190,23 @@
 //  
 // in case these sorts of things interest you.
 //
+// ### 0.3.3
+// 
+// * added endianness (BE and LE)
+// * added radix (HEX, DEC, OCT and BIN)
+// * added 16-nibble (8 byte) groups
+// * added option to display more non-lower-ascii chars
+// * toString() can now accept Uint8Array -- the natural way
+//   of reading files and streams in browsers
+// * implemented and exported `maxnumberlen()`
+// * performance += { 15-30% }
+// * Node.js tests ++
+// * created browser tests
+// * created static html demo page (view.html)
+// * restricted the set of node.js versions and browsers:
+//   (now require support of `BigInt`: Node.JS 10.4+, browsers since 2018-2020)
+// * the travis is passing now
+//
 // ### 0.3.2
 // 
 // * documentation typos
@@ -204,14 +230,15 @@
 
 (function (arg) {
 
-var hexy = function (buffer, config) {
-  var h = new Hexy(buffer, config)
+var hexy = function(buffer, config) {
+  const h = new Hexy(buffer, config)
   return h.toString()
 }
 
-var Hexy = function (buffer, config) {
-  var self = this
- 	
+var Hexy = function(buffer, config) {
+  const self = this
+  const MAX_ADDRESS_LENGTH = 8 // TODO: might want to calculate
+
   // if we have a Buffer class, convert
   if (typeof Buffer !== 'undefined') {
     buffer = (Buffer.isBuffer(buffer) && buffer) 
@@ -222,28 +249,36 @@ var Hexy = function (buffer, config) {
   buffer = buffer || []
   config = config || {}
  
-  self.buffer    = buffer // magic string conversion here?
-  self.width     = parseInt(config.width) || 16
-  self.numbering = config.numbering == "none"  ? "none" : "hex_bytes"
-   
+  self.buffer         = buffer // magic string conversion here?
+  self.bytes_per_line = parseInt(config.width) || 16 // formerly `width`
+  self.numbering      = config.numbering == "none" ? "none" : "hex_bytes"
+
+  self.bytes_per_group = 2  // by default (not handled below) "fours" will fold into `bytes_per_group == 2`
   switch (config.format) {
     case "none":
-    case "twos":
-    case "eights":
-      self.format = config.format
+      self.bytes_per_group = 0 // one byte per group, but no delimiters
       break
-    default:
-      self.format = "fours"
+    case "twos":
+      self.bytes_per_group = 1
+      break
+    case "eights":
+      self.bytes_per_group = 4
+      break
+    case "sixteens":
+      self.bytes_per_group = 8
+      break
   }
-  
-  self.caps        = config.caps        == "upper" ? "upper" : "lower"
-  self.annotate    = config.annotate    == "none"  ? "none"  : "ascii"
-  self.prefix      = config.prefix      || ""
-  self.indent      = config.indent      || 0
-  self.html        = config.html        || false
-  self.offset      = config.offset      || 0
-  self.length      = config.length      || -1
-  
+                                                                                                   
+  self.littleEndian   = config.littleEndian   || false
+  self.radix          = config.radix          || 16
+  self.caps           = config.caps           == "upper" ? "upper" : "lower"
+  self.annotate       = config.annotate       == "none"  ? "none"  : "ascii"
+  self.prefix         = config.prefix         || ""
+  self.indent         = config.indent         || 0
+  self.html           = config.html           || false
+  self.offset         = config.offset         || 0
+  self.length         = config.length         || -1
+  self.extendedChs    = config.extendedChs    || false
   self.display_offset = config.display_offset || 0
 
   if (self.offset) {
@@ -254,154 +289,209 @@ var Hexy = function (buffer, config) {
 
   if (self.length !== -1) {
     if (self.length <= self.buffer.length) {
-      self.buffer = self.buffer.slice(0,self.length)
+      self.buffer = self.buffer.slice(0, self.length)
     }
   }
 
-  for (var i = 0; i!=self.indent; ++i) {
-    self.prefix = " "+self.prefix
+  self.prefix = (self.html ? "&nbsp;" : " ").repeat(self.indent) + self.prefix
+
+  self.hex_line_length = (maxnumberlen(self.bytes_per_group, self.radix)) * self.bytes_per_line
+                        / Math.max(self.bytes_per_group, 1)
+  switch (self.bytes_per_group) { // the original code (now documented in the tests),
+      case 8:                     // some modes had mode-dependent number of extra spaces at the end of the line
+      case 4:
+      case 2:
+        self.hex_line_length += Math.floor(self.bytes_per_line / self.bytes_per_group)
+        break
+      case 1:
+        self.hex_line_length += self.bytes_per_line + 3
+        break
+      case 0:
+        self.hex_line_length += 2
+        break
   }
+  self.bytes_per_group = Math.min(self.bytes_per_group, self.bytes_per_line)
 
-  var pos = 0
-
-  this.toString = function () {
+  this.toString = function() {
     var str = ""
-    
-    if (self.html) { str += "<div class='hexy'>\n"}
-    //split up into line of max `self.width`
-    var line_arr = lines()
-    
-    //lines().forEach(function(hex_raw, i)
-    for (var i = 0; i!= line_arr.length; ++i) {
-      var hex_raw = line_arr[i],
-          hex = hex_raw[0],
-          raw = hex_raw[1]
-      //insert spaces every `self.format.twos`, fours or eights
-      var howMany = hex.length
-      if (self.format === "eights") {
-        howMany = 8
-      } else if (self.format === "fours") {
-        howMany = 4
-      } else if (self.format === "twos") {
-        howMany = 2
-      }
+    var addr = self.offset + self.display_offset
+    var odd = false
 
-      var hex_formatted = ""
+    if (self.html) { str += "<div class='hexy'>\n" }
 
+    // each `slice` is a single output line:
+    for (var start = 0; start < self.buffer.length; start += self.bytes_per_line) {
+      const end = Math.min(start + self.bytes_per_line, self.buffer.length)
+      const slice = self.buffer.slice(start, end)
 
-      for (var j =0; j< hex.length; j+=howMany) {
-        var s = hex.substr(j, howMany)
-        hex_formatted += s + " "
-      } 
-
-      var addr = (i*self.width)+self.offset+self.display_offset;
       if (self.html) {
-        var odd = i%2 == 0 ? " even" : "  odd"
-        str += "<div class='"+pad(addr, 8)+odd+"'>"
+        str += "<div class='" + num2str(addr, MAX_ADDRESS_LENGTH, 16) + (odd ? "  odd" : " even") + "'>"
+        odd = !odd
       }
-      str += self.prefix 
+      str += self.prefix
 
+      // the address column:
       if (self.numbering === "hex_bytes") {
-        str += pad(addr, 8) // padding...
-        str += ": "
+        str += num2str(addr, MAX_ADDRESS_LENGTH, 16) + ": "
       }
-      
-      var padlen = 0
-      switch(self.format) {
-        case "eights":
-          padlen = self.width*2 + Math.floor(self.width/4)
+
+      // the binary representation column:
+      str += hex(slice, self.bytes_per_line, self.bytes_per_group, self.radix, self.littleEndian)
+
+      // the text representation column:
+      if (self.annotate === "ascii") {
+        var text = ""
+        switch (slice.constructor) {
+        case Array:
+          text = String.fromCharCode.apply(self, slice)
           break
-        case "fours":
-          padlen = self.width*2 + Math.floor(self.width/2)
-          break
-        case "twos":
-          padlen = self.width*3 + 2
+        case Uint8Array:
+          slice.forEach(ch => text += String.fromCharCode(ch))
           break
         default:
-          padlen = self.width * 2 + 1
+          text = slice.toString('latin1')
+        }
+        str += " " + (self.html ? html_escape(text) : ascii_escape(text))
       }
-
-      str += rpad(hex_formatted, padlen)
-      if (self.annotate === "ascii") {
-        str+=" "
-        var ascii = raw.replace(/[\000-\040\177-\377]/g, ".")
-        if (self.html) {str += escape(ascii)}
-        else { str += ascii }
-      }
-      if (self.html) {
-        str += "</div>\n"
-      } else {
-      str += "\n"
-      } 
+      str += self.html ? "</div>\n" : "\n"
+      addr += self.bytes_per_line
     }
-    if (self.html) { str += "</div>\n"}
+
+    if (self.html) { str += "</div>\n" }
     return str
   }
 
-  var lines = function() {
-    var hex_raw = []
-    for (var i = 0; i<self.buffer.length ; i+=self.width) {
-      var begin = i,
-          end   = i+self.width >= self.buffer.length ? self.buffer.length : i+self.width,
-          slice = self.buffer.slice(begin, end),
-          hex   = self.caps === "upper" ? hexu(slice) : hexl(slice),
-          raw   = slice.toString('ascii')
-      
-      if (self.buffer.constructor == Array) {
-        raw = String.fromCharCode.apply(self, slice)
-      }
-      hex_raw.push([hex,raw])
-    }
-    return hex_raw
-
-  }
-
-  var hexl = function (buffer) {
+  // renders the binary representation of individual line
+  var hex = function(buffer, bytes_per_line, bytes_per_group, radix, littleEndian) {
     var str = ""
-    for (var i=0; i!=buffer.length; ++i) {
-      if (buffer.constructor == String) {
-        str += pad(buffer.charCodeAt(i), 2)
-      } else {
-        str += pad(buffer[i], 2)
+    const delimiter = bytes_per_group == 0 ? "" : " "
+    const group_len = maxnumberlen(bytes_per_group, radix)
+    const padlen = (bytes_per_line - buffer.length) * (bytes_per_group == 0 ? group_len: (group_len + 1) / bytes_per_group)
+    if (bytes_per_group == 0) {
+      bytes_per_group = 1
+    }
+    const start = littleEndian ? bytes_per_group - 1 : 0
+    const end   = littleEndian ? -1 : bytes_per_group
+    const step  = littleEndian ? -1 : 1
+    for (var group = 0; group < buffer.length / bytes_per_group; ++group) {
+      var val = bytes_per_group < 4 ? 0 : BigInt(0)
+      for (var ii = start; ii != end; ii += step) {
+        const i = group * bytes_per_group + ii
+        if (i >= buffer.length) { // not rendering dangling bytes.  TODO: render them as smaller grouping
+          break
+        }
+        if (bytes_per_group < 4) {
+          val = val * 256 + ((buffer.constructor == String ? buffer.codePointAt(i) : buffer[i]) & 0xff)
+        } else {
+          val = val * 256n + BigInt((buffer.constructor == String ? buffer.codePointAt(i) : buffer[i]) & 0xff)
+        }
+      }
+      const text = val.toString(radix)
+      for (var c = 0; c < group_len - text.length; c++) {
+        str += "0"
+      }
+      str += text
+      str += delimiter
+      if (self.caps === "upper") {
+        str = str.toUpperCase()
       }
     }
+    if (buffer.length < bytes_per_line) {
+      str += (self.html ? "&nbsp;": " ").repeat(padlen)
+    }
+    str = rpad(str, self.hex_line_length)
     return str
   }
-  var hexu = function (buffer) {
-    return hexl(buffer).toUpperCase()
+
+  // converts a number to a string and pads it with '0' on the left, up to requested length
+  var num2str = function(b, len, radix) {
+    const s = b.toString(radix)
+    return "0".repeat(len - s.length) + s
   }
 
-  var pad = function(b, len) {
-    var s = b.toString(16)
-    
-    while (s.length < len) {
-      s = "0" + s
-    }
-    return s
-  } 
   var rpad = function(s, len) {
-    for (var n = len - s.length; n>0; --n) {
-      if (self.html) {
-        s += "&nbsp;"
-      } else {
-        s += " "
-      }
-    
+    const to_add = len - s.length - 1
+    if (to_add > 0) {
+      s += (self.html ? "&nbsp;" : " ").repeat(to_add)
     }
     return s
   }
 
-  var escape = function (str) {
-    str = str.split("&").join("&amp;")
-    str = str.split("<").join("&lt;")
-    str = str.split(">").join("&gt;")
+  const ALL_EXCEPT_PRINTABLE_LATIN = /[^\x20-\x7f]/g
+  const CONTROL_CHARACTERS_ONLY = /[\x00-\x1f]/g
+
+  var ascii_escape = function(str) {
+    return str.replace(self.extendedChs ? CONTROL_CHARACTERS_ONLY : ALL_EXCEPT_PRINTABLE_LATIN, ".")
+  }
+
+  var html_escape = function(str) {
+    str = str.replace(/&/g, "&amp;") // `replace()` is measurably faster than `split().join()` in Node.js v.*
+    str = str.replace(/</g, "&lt;")
+    str = str.replace(/>/g, "&gt;")
+    if (self.extendedChs) {
+      str = str.replace(/\'/g, "&apos;")
+      str = str.replace(/\"/g, "&quot;")
+      str = str.replace(ALL_EXCEPT_PRINTABLE_LATIN, function(ch) {
+        ch = ch.codePointAt(0)
+        return "&#x" + ch.toString(16) + ";"
+      })
+    } else {
+      str = str.replace(ALL_EXCEPT_PRINTABLE_LATIN, ".")
+    }
     return str
   }
-  
-
 }
 
-Hexy.VERSION = "0.3.2"
+Hexy.VERSION = "0.3.3"
+
+var maxnumberlen = function(bytes, radix) {
+  var result = 2
+  if (bytes == 0) {
+    bytes = 1
+  }
+  switch (radix) {
+    case 2:       // BIN: 8, 16, 32, 64
+      result = bytes * 8
+      break
+    case 8:       // OCT: 3, 6, 11, 22
+      switch (bytes) {
+        case 1:
+          result = 3
+          break
+        case 2:
+          result = 6
+          break
+        case 4:
+          result = 11
+          break
+        case 8:
+          result = 22
+          break
+      }
+      break
+    case 10:      // DEC: 3, 6, 10, 20
+      switch (bytes) {
+        case 1:
+          result = 3
+          break
+        case 2:
+          result = 6
+          break
+        case 4:
+          result = 10
+          break
+        case 8:
+          result = 20
+          break
+      }
+      break
+    case 16:      // HEX: 2, 4, 8, 16
+      result = 2 * bytes
+      break
+  }
+  return result
+}
+
 
 // This is probably not the prettiest or coolest way to to determine runtime
 // environment. It seems to work and I'm not up to the task figuring out what
@@ -421,5 +511,6 @@ if (typeof exports !== "undefined") {
 }
 _exp.hexy = hexy
 _exp.Hexy = Hexy
+_exp.maxnumberlen = maxnumberlen
 
 })(this)

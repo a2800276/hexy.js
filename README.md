@@ -65,16 +65,25 @@ console.log(hexy.hexy(b))
 var format = {}
     format.width = width // how many bytes per line, default 16
     format.numbering = n // ["hex_bytes" | "none"],  default "hex_bytes"
-    format.format = f    // ["eights"|"fours"|"twos"|"none"], how many nibbles per group
+    format.radix = b     // [2, 8, 10, 16], the radix for numeral representation
+                         // for the right column,    default 16
+    format.format = f    // ["twos"|"fours"|"eights"|"sixteens"|"none"], number of nibbles per group
                          //                          default "fours"
+    format.littleEndian = true
+                         // endiannes of data,       default false
+                         // counts when number of nibbles is more than "twos",
+                         // i.e. displaying groups bigger than one byte
+    format.extendedChs = true
+                         // allow displaying more characters in the text column
+                         //                          default false
     format.caps = c      // ["lower"|"upper"],       default lower
-    format.annotate=a    // ["ascii"|"none"], ascii annotation at end of line?
+    format.annotate = a  // ["ascii"|"none"], ascii annotation at end of line?
                          //                          default "ascii"
-    format.prefix=p      // <string> something pretty to put in front of each line
+    format.prefix = p    // <string> something pretty to put in front of each line
                          //                          default ""
-    format.indent=i      // <num> number of spaces to indent
+    format.indent = i    // <num> number of spaces to indent
                          //                          default 0
-    format.html=true     // funky html divs 'n stuff! experimental.
+    format.html = true   // funky html divs 'n stuff! experimental.
                          //                          default: false
     format.offset = X    // generate hexdump based on X byte offset
                          // into the provided source
@@ -86,7 +95,7 @@ var format = {}
                          // add Z to the address prepended to each line
                          // (note, even if `offset` is provided, addressing
                          // is started at 0)
-                         //                          default 0                         
+                         //                          default 0
 
 console.log(hexy.hexy(buffer, format))
 ``` 
@@ -96,7 +105,7 @@ console.log(hexy.hexy(buffer, format))
  
  ## Installing
  
- Either use `npm` (or whatever caompatible npm thingie people are using
+ Either use `npm` (or whatever compatible npm thingie people are using
  these days) :
    
 ```shell   
@@ -128,21 +137,8 @@ console.log(hexy(buff));
 ```
 
  ## Browser Support
- 
- Basically eveything should work fine in the browser as well, just
- include hexy.js in a script tag, and you'll get `hexy` and `Hexy` stuck
- to the global object (window).
- 
- Some caveats: "Works fine on my system™". Browser support is 'new' and
- not thoroughly tested (... eh, only on chrome [Version: whatever I'm
- currently running]). Under node, I can generally assume that binary data
- is passed in in a sane fashion using buffers, but plain old Javascript
- doesn't really have any datatypes that can handle bytes gracefully.
- Currently only Strings and arrays containing Number'ish values are
- supported, I'd like to add numeric and typed arrays more explicitly.
- 
- Let me know in case you run into any issues, I'd be happy to find out
- about them.
+ Browser support is fixed (now supports `Array` and `Uint8Array`) in 0.3.3.
+ Please refer to `test.html` for examples.
  
  ## TODOS
  
@@ -157,7 +153,7 @@ console.log(hexy(buff));
 
  Deno support would also be nice.
  
- Better testing for browser use.
+ **DONE** Better testing for browser use.
  
   
  ## Thanks
@@ -180,6 +176,35 @@ console.log(hexy(buff));
      http://github.com/a2800276/hexy
   
  in case these sorts of things interest you.
+
+### 0.3.3
+
+* introduced the concept of endiannes (googleable and wikiable).  Before this change, the code assumed that the displayed data is big-endian.
+    However, most file formats and most CPU architectures are little-endian.  So, introduced the support for it.
+    The endiannes can be controlled by passing bool via `littleEndian`, which defaults to `false` to support the behavior of the previous versions
+* introduced ability to group 8 bytes (16 nibbles).  With prevalence of 64-bit computing, the 64-bit (i.e. 8-byte) data is getting more and more popular.
+    The 8-byte grouping is enabled by passing "sixteens" into `config.format`
+* introduced ability to display the binary data in bases (radixes) other than hexadecimal: binary, octal, decimal and hexadecimal
+    The radix is controlled by passing 2, 8, 10 or 16 into `config.radix`
+* introduced ability to control if non-printable characters are displayed or replaced with `'.'`.
+    To display extended characters, pass `config.extendedChs: true`. The exact behavior of this flag depends on the output type, html or not:
+    In `config.html: true` mode, all the characters can be displayed, even 0-0x20 have visual represenation.
+    In `config.html: false` mode, only the extended characters beyond the end of standard ASCII are displayed.
+* implemented and exported `maxnumberlen()` -- calculates how many characters can a number occupy given bittness and radix
+* several tweaks improved performance by ~15-30%, depending on the platform (compared to v.0.3.2).
+* a bit more order in the node.js tests:
+  * the tests are read from an uniform table.  This allows enumerating the testcases, as well as sharing them with browser tests
+  * added ability to do performance tests -- just run `time node test perf`
+* enabled browser tests:
+  * visual summary with details of all the tests, collapsable and color-coded
+  * same set of testcases as in node.js
+  * all tests pass now.  Found and fixed a bug that was present in all browsers where they handle bigger-than-byte data differently compared to node.js
+* created a static html page to hex display files (view.html)
+* restricted the set of node.js versions and browsers (now requires support of `BigInt`: Node.JS 10.4+, browsers since 2018-2020)
+* the Travis-ci is passing now
+* nits:
+  * removed some of unused variables
+  * increased formating consistency
 
  ### 0.3.2
  

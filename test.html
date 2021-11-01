@@ -1,23 +1,208 @@
 <!doctype html>
 <html>
-<!-- 
-  Extremely rudimentary test for browser support.
-  Open this file in a browser and see if it works.
--->
 <head>
   <style>
+    body {
+      font-family: sans-serif;
+    }
     .hexy {
       font-family: monospace;
     }
+    #totals {
+      font-weight: bold;
+      padding: 1em;
+      text-align: center;
+    }
+    .whole {
+      border: 2px solid;
+      border-radius: .5em;
+      padding: 1em;
+      width: 100%;
+      text-align: left;
+    }
+    .active, .whole:hover {
+      background-color: azure;
+    }
+    .content {
+      display: flex;
+      overflow: hidden;
+      padding: .2em;
+      width: 100%;
+    }
+    .box {
+      border: 2px solid;
+      border-radius: .3em;
+    }
+    .input-box {
+      overflow: hidden;
+      width: 30%;
+    }
+    .flags-box {
+      flex-grow: 1;
+      width: 10%;
+    }
+    .expected-box {
+      flex-grow: 1;
+      width: 30%;
+    }
+    .result-box {
+      flex-grow: 1;
+      width: 30%;
+    }
+    .variable {
+      color: black;
+      font-family: monospace;
+    }
+    .pass {
+      color: green;
+      border-color: green;
+    }
+    .fail {
+      border-color: red;
+      color: red;
+    }
+    .space {
+      color: lightgray;
+    }
+    .key {
+      font-weight: bold;
+      font-style: italic;
+    }
+    .string {
+      color: green;
+    }
+    .number, .boolean, .null {
+      color: blue;
+    }
   </style>
-</head>
-<body>
-  <div id="test"></div>
-<script src="hexy.js"></script>
-<script type="text/javascript">
-  var test_thingie = document.querySelector("#test")
-  test_thingie.innerHTML=hexy([2,3, 0xff, 0x0f, 0xf0, 0x31], {html: true})
-</script>
-</body>
+  <script src="hexy.js"></script>
+  <script src="test/testcases.js"></script>
+  <script type="text/javascript">
+    var test_root = null;
+    var template_node;
 
+    var testcase_id = [ 0, 0 ];
+    var executed = 0, failed = 0;
+
+    function prettyPrintString(str) {
+      return str.replace(/\n/g, '<br/>')
+                .replace(/ /g, '<span class="space">.</span>');
+    }
+    function prettyPrintObject(object) {
+      const json = JSON.stringify(object, undefined, 1)
+                        .replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;')
+                        .replace(/{/g, '{<br>')
+                        .replace(/}/g, '<br>}')
+                        .replace(/,/g, ',<br>');
+      return json.replace(/("(\u[a-zA-Z0-9]{4}|\[^u]|[^\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
+        function (match) {
+          var cls = 'number';
+          if (/^"/.test(match)) {
+            if (/:$/.test(match)) {
+              cls = 'key';
+            } else {
+              cls = 'string';
+            }
+          } else if (/true|false/.test(match)) {
+            cls = 'boolean';
+          } else if (/null/.test(match)) {
+            cls = 'null';
+          }
+          return '<span class="' + cls + '">' + match + '</span>';
+        });
+    }
+
+    function prettyPrint(obj) {
+      return typeof obj === 'string'
+              ? '"<span class="string">' + prettyPrintString(obj) + '</span>"'
+              : prettyPrintObject(obj);
+    }
+
+    function check(input, flags, expected, result) {
+      var testcase_node = template_node.content.cloneNode(true);
+      var whole = testcase_node.querySelector(".whole");
+      var header = testcase_node.querySelector(".header");
+      var content = testcase_node.querySelector(".content");
+      header.innerHTML = "test " + testcase_id.toString() + ": ";
+      testcase_node.querySelector(".input").innerHTML = prettyPrint(input);
+      testcase_node.querySelector(".flags").innerHTML = prettyPrintObject(flags);
+      testcase_node.querySelector(".expected").innerHTML = prettyPrintString(expected);
+      testcase_node.querySelector(".result").innerHTML = prettyPrintString(result);
+      if (expected !== result) {
+        failed++;
+        header.innerHTML += "FAIL";
+        whole.className += " fail";
+      } else {
+        header.innerHTML += "PASS";
+        whole.className += " pass";
+        content.style.display = "none";
+      }
+      test_root.appendChild(testcase_node);
+      executed++;
+    }
+
+    function pageLoaded() {
+      totals_root = document.querySelector("#totals");
+      test_root = document.querySelector("#test");
+      template_node = document.getElementById("testcase");
+      for (var tc = 0; tc < testcases.length; tc++) {
+        if ('inputs' in testcases[tc]) {
+          for (var ii = 0; ii < testcases[tc].inputs.length; ii++) {
+            testcase_id = [tc, ii];
+            check(testcases[tc].inputs[ii],
+                  testcases[tc].params,
+                  testcases[tc].result,
+                  hexy(testcases[tc].inputs[ii], testcases[tc].params));
+          }
+        } else {
+          testcase_id = tc;
+          check(testcases[tc].input,
+                testcases[tc].params,
+                testcases[tc].result,
+                hexy(testcases[tc].input, testcases[tc].params));
+        }
+      }
+      totals_root.innerHTML = "Executed: " + executed + ", Failed: " + failed;
+    }
+
+    function collapse() {
+      var content = event.srcElement.querySelector(".content");
+      if (content.style.display === "none") {
+        content.style.display = "flex";
+      } else {
+        content.style.display = "none";
+      }
+    }
+</script>
+</head>
+<body onload='pageLoaded();'>
+  <div id="totals"></div>
+  <div id="test"></div>
+
+  <template id='testcase'>
+    <fieldset class='whole' onclick='collapse();'>
+      <legend class='header'>PASS</legend>
+      <div class='content'> <!-- this div collapses-->
+        <fieldset class='input-box box'>
+          <legend>input</legend>
+          <div class='input variable'></div>
+        </fieldset>
+        <fieldset class='flags-box box'>
+          <legend>flags</legend>
+          <div class='flags variable'></div>
+        </fieldset>
+        <fieldset class='expected-box box'>
+          <legend>expected</legend>
+        <div class='expected variable'></div>
+        </fieldset>
+        <fieldset class='result-box box'>
+          <legend>result</legend>
+          <div class='result variable'></div>
+        </fieldset>
+      </div>
+    </fieldset>
+  </template>
+</body>
 </html>
