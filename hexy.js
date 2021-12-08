@@ -190,6 +190,10 @@
 //  
 // in case these sorts of things interest you.
 //
+// ### 0.3.4
+//
+// * issue concerning static analysis and BigInt usage
+//
 // ### 0.3.3
 // 
 // * added endianness (BE and LE)
@@ -442,7 +446,7 @@ var Hexy = function(buffer, config) {
   }
 }
 
-Hexy.VERSION = "0.3.3"
+Hexy.VERSION = "0.3.4"
 
 var maxnumberlen = function(bytes, radix) {
   var result = 2

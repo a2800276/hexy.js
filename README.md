@@ -177,6 +177,10 @@ console.log(hexy(buff));
   
  in case these sorts of things interest you.
 
+### 0.3.4
+
+* issue concerning static analysis and BigInt usage
+
 ### 0.3.3
 
 * introduced the concept of endiannes (googleable and wikiable).  Before this change, the code assumed that the displayed data is big-endian.
