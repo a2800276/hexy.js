@@ -117,7 +117,6 @@ let buffer_: Buffer;
 
 if (filename) {
   buffer = fs.readFileSync(filename);
-  console.log(format);
   console.log(hexy.hexy(buffer, format));
 } else {
   const stdin = process.openStdin();
