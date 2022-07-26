@@ -1,5 +1,4 @@
-import { FormatOptions } from "./FormatOptions";
-import Hexy from "./hexy";
+import ReversibleHexy from "./reversible-hexy";
 import { testcases } from "./test/testcases";
 
 let testcase_id: number | [number, number] = [0, 0]; // some tests have multiple variants (distinguished by the intput).  To make the navigation easier, the tests are numbered as [line.subtest]
@@ -30,9 +29,9 @@ function check(
     console.log("   ACTUALLY RETURNED");
     console.log(is);
     console.log("more detailed view of EXPECTED:");
-    console.log(Hexy.hexy(should, {}));
+    console.log(ReversibleHexy.hexy(should, {}));
     console.log("more detailed view of ACTUALLY RETURNED:");
-    console.log(Hexy.hexy(is, {}));
+    console.log(ReversibleHexy.hexy(is, {}));
     failed++;
   } else if (verbose) {
     console.log(is);
@@ -49,11 +48,11 @@ for (let rep = 0; rep < iterations; rep++) {
       if (inputs) {
         for (let ii = 0; ii < inputs.length; ii++) {
           testcase_id = [tc, ii];
-          check(testcases[tc].result, Hexy.hexy(inputs[ii], params));
+          check(testcases[tc].result, ReversibleHexy.hexy(inputs[ii], params));
         }
       } else if (input) {
         testcase_id = tc;
-        check(testcases[tc].result, Hexy.hexy(input, params));
+        check(testcases[tc].result, ReversibleHexy.hexy(input, params));
       }
     }
   }
@@ -64,7 +63,7 @@ function checkVersion() {
   const pkg = fs.readFileSync("package.json");
   const version = JSON.parse(pkg).version;
 
-  check(version, Hexy.VERSION);
+  check(version, ReversibleHexy.VERSION);
 }
 checkVersion();
 

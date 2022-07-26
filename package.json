@@ -4,7 +4,8 @@
   "description": "hexdump, binary pretty-printing and binary generation from hexdump",
   "author": "Tim Becker <tim.becker@kuriositaet.de>, Dominick Mancini <dominick.mancini@ontariotechu.net>",
   "license": "MIT",
-  "main": "./hexy.js",
+  "main": "dist/reversible-hexy.js",
+  "types": "dist/index.d.ts",
   "repository": {
     "type": "git",
     "url": "git://github.com/rockwell95/reversible-hexy.js.git"
@@ -17,6 +18,7 @@
     "last 4 versions"
   ],
   "scripts": {
+    "prepublish": "tsc",
     "test": "tsc && node ./dist/test.js",
     "build": "tsc"
   },

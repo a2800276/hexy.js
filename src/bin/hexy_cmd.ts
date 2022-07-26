@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import hexy from "../hexy";
+import reversibleHexy from "../reversible-hexy";
 import fs from "fs";
 import { FormatOptions } from "../FormatOptions";
 
@@ -36,6 +36,9 @@ function usage(mes?: string) {
   console.log(
     "--indent    [(0)|<num>]                number of spaces to indent output"
   );
+  console.log(
+    "--revert                               reverse operation: convert (or patch) hexdump into binary"
+  );
   console.log("parameters in (parens) are default");
   process.exit(1);
 }
@@ -50,7 +53,12 @@ function existsFatal(fn: string) {
   usage("not a file: " + fn);
 }
 
-function handleArgs(): { filename?: string; format: FormatOptions } {
+function handleArgs(): {
+  filename?: string;
+  format: FormatOptions;
+  revert: boolean;
+  output: string | undefined;
+} {
   const format: FormatOptions = {};
   const cliFormat: { [key: string]: string } = {};
   const ARGS = [
@@ -64,10 +72,14 @@ function handleArgs(): { filename?: string; format: FormatOptions } {
     "--annotate",
     "--prefix",
     "--indent",
+    "--revert",
+    "--output",
   ];
 
   let args = process.argv;
   let filename;
+  let revert: boolean = false;
+  let output: string | undefined = undefined;
 
   for (let i = 2; i < args.length; ++i) {
     let arg = args[i];
@@ -86,8 +98,13 @@ function handleArgs(): { filename?: string; format: FormatOptions } {
       }
     }
     arg = arg.substring(2, arg.length);
-    console.log(arg);
-    cliFormat[arg] = args[++i];
+
+    // The "revert" flag does not take a second argument
+    if (arg === "revert") {
+      revert = true;
+    } else {
+      cliFormat[arg] = args[++i];
+    }
   }
 
   if (cliFormat.width) {
@@ -102,29 +119,45 @@ function handleArgs(): { filename?: string; format: FormatOptions } {
   if (cliFormat.html) {
     format.html = true;
   }
+  if (cliFormat.output) {
+    output = cliFormat.output;
+  }
   format.littleEndian = cliFormat.littleEndian == "true";
   format.extendedChs = cliFormat.extendedChs == "true";
-  return { filename, format };
+  return { filename, format, revert, output };
 }
 
 /************************************************************************
  * MAIN *****************************************************************
  ************************************************************************/
 
-const { format, filename } = handleArgs();
+const { format, filename, revert, output } = handleArgs();
 let buffer: Buffer | null = null;
 let buffer_: Buffer;
 
 if (filename) {
+  let data: string | Buffer;
   buffer = fs.readFileSync(filename);
-  console.log(hexy.hexy(buffer, format));
+  if (revert) {
+    data = reversibleHexy.unHexy(buffer.toString(), {
+      columns: format.width,
+    });
+    console.log(data.toString());
+  } else {
+    data = reversibleHexy.hexy(buffer, format);
+    console.log(data);
+  }
+  if (output) {
+    fs.writeFileSync(output, data);
+  }
 } else {
   const stdin = process.openStdin();
-  stdin.on("data", function (data) {
+  let data: string | Buffer;
+  stdin.on("data", (data) => {
     let offset = 0;
     if (buffer) {
       offset = buffer.length;
-      buffer_ = Buffer.from(buffer.length + data.length);
+      buffer_ = Buffer.alloc(buffer.length + data.length);
       buffer.copy(buffer_, 0, 0);
       buffer = buffer_;
       data.copy(buffer, offset, data.length);
@@ -133,9 +166,20 @@ if (filename) {
     }
   });
 
-  stdin.on("end", function () {
+  stdin.on("end", () => {
     if (buffer) {
-      console.log(hexy.hexy(buffer, format));
+      if (revert) {
+        data = reversibleHexy.unHexy(buffer.toString(), {
+          columns: format.width,
+        });
+        console.log(data.toString());
+      } else {
+        data = reversibleHexy.hexy(buffer, format);
+        console.log(data);
+      }
+    }
+    if (output) {
+      fs.writeFileSync(output, data);
     }
   });
 }
