@@ -387,7 +387,7 @@ var Hexy = function(buffer, config) {
         if (bytes_per_group < 4) {
           val = val * 256 + ((buffer.constructor == String ? buffer.codePointAt(i) : buffer[i]) & 0xff)
         } else {
-          val = BigInt(val) * 256n + BigInt(((buffer.constructor == String ? buffer.codePointAt(i) : buffer[i]) & 0xff))
+          val = BigInt(val) * BigInt(256) + BigInt(((buffer.constructor == String ? buffer.codePointAt(i) : buffer[i]) & 0xff))
         }
       }
       const text = val.toString(radix)
