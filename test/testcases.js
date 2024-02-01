@@ -145,6 +145,8 @@ const testcases = [
 // #30
   { input: [ 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0xd2, 0x77, 0x6f, 0x72, 0x6c, 0x64 ], params: {format: "twos"}, result: "00000000: 68 65 6c 6c 6f d2 77 6f 72 6c 64                   hello.world\n" },
   { input: [ 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0xd2, 0x77, 0x6f, 0x72, 0x6c, 0x64 ], params: {format: "twos", extendedChs:true}, result: "00000000: 68 65 6c 6c 6f d2 77 6f 72 6c 64                   hello" + "\u00d2" + "world\n" },
+  { input: "abc", params: {littleEndian: true}, result: "00000000: 6261 63                                  abc\n" },
+  { input: "abc", params: {littleEndian: true, format: "eights"}, result: "00000000: 636261                               abc\n" },
 ];
 if (typeof window === 'undefined') {
   module.exports = testcases;

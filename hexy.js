@@ -369,7 +369,7 @@ var Hexy = function(buffer, config) {
   var hex = function(buffer, bytes_per_line, bytes_per_group, radix, littleEndian) {
     var str = ""
     const delimiter = bytes_per_group == 0 ? "" : " "
-    const group_len = maxnumberlen(bytes_per_group, radix)
+    var group_len = maxnumberlen(bytes_per_group, radix)  // this changes for the very last group in the file
     const padlen = (bytes_per_line - buffer.length) * (bytes_per_group == 0 ? group_len: (group_len + 1) / bytes_per_group)
     if (bytes_per_group == 0) {
       bytes_per_group = 1
@@ -381,8 +381,11 @@ var Hexy = function(buffer, config) {
       var val = bytes_per_group < 4 ? 0 : BigInt(0)
       for (var ii = start; ii != end; ii += step) {
         const i = group * bytes_per_group + ii
-        if (i >= buffer.length) { // not rendering dangling bytes.  TODO: render them as smaller grouping
-          break
+        if (i >= buffer.length) { // dangling bytes
+          if (radix == 2 || radix == 16) {
+            group_len -= maxnumberlen(1, radix)
+          } // for decimal and octal representation, the length of binary column is difficult to predict
+          continue
         }
         if (bytes_per_group < 4) {
           val = val * 256 + ((buffer.constructor == String ? buffer.codePointAt(i) : buffer[i]) & 0xff)
