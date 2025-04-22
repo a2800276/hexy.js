@@ -24,7 +24,6 @@
 // 
 // but you can configure:
 // 
-//   * Line numbering
 //   * Line width
 //   * Format of byte grouping
 //   * The case (upper/lower) of hex decimals
@@ -59,46 +58,42 @@
 // 
 // ## Formatting Options
 // 
-// Formatting options are configured by passing a `format` object to the `hexy` function:
+// Formatting options are configured by passing a `config` object to the `hexy` function:
 // 
-//```javascript
-//var format = {}
-//    format.width = width // how many bytes per line, default 16
-//    format.numbering = n // ["hex_bytes" | "none"],  default "hex_bytes"
-//    format.radix = b     // [2, 8, 10, 16], the radix for numeral representation
-//                         // for the right column,    default 16
-//    format.format = f    // ["twos"|"fours"|"eights"|"sixteens"|"none"], number of nibbles per group
-//                         //                          default "fours"
-//    format.littleEndian = true
-//                         // endiannes of data,       default false
-//                         // counts when number of nibbles is more than "twos",
-//                         // i.e. displaying groups bigger than one byte
-//    format.extendedChs = true
-//                         // allow displaying more characters in the text column
-//                         //                          default false
-//    format.caps = c      // ["lower"|"upper"],       default lower
-//    format.annotate = a  // ["ascii"|"none"], ascii annotation at end of line?
-//                         //                          default "ascii"
-//    format.prefix = p    // <string> something pretty to put in front of each line
-//                         //                          default ""
-//    format.indent = i    // <num> number of spaces to indent
-//                         //                          default 0
-//    format.html = true   // funky html divs 'n stuff! experimental.
-//                         //                          default: false
-//    format.offset = X    // generate hexdump based on X byte offset
-//                         // into the provided source
-//                         //                          default 0
-//    format.length = Y    // process Y bytes of the provide source 
-//                         // starting at `offset`. -1 for all
-//                         //                          default -1
-//    format.display_offset = Z
-//                         // add Z to the address prepended to each line
-//                         // (note, even if `offset` is provided, addressing
-//                         // is started at 0)
-//                         //                          default 0
+// var config: {
+//   width = width,      // how many bytes per line, default 16
+//   radix = b,          // [2, 8, 10, 16], the radix for numeral representation
+//                       // for the right column,    default 16
+//   format = f,         // ["twos"|"fours"|"eights"|"sixteens"|"none"], number of nibbles per group
+//                       //                          default "fours"
+//   littleEndian = true,// endiannes of data,       default false
+//                       // counts when number of nibbles is more than "twos",
+//                       // i.e. displaying groups bigger than one byte
+//   extendedChs = true, // allow displaying more characters in the text column
+//                       //                          default false
+//   caps = c,           // ["lower"|"upper"],       default lower
+//   annotate = a,       // ["ascii"|"none"], ascii annotation at end of line?
+//                       //                          default "ascii"
+//   prefix = p,         // <string> something pretty to put in front of each line
+//                       //                          default ""
+//   indent = i,         // <num> number of spaces to indent every output line
+//                       //                          default 0
+//   html = true,        // funky html divs 'n stuff! experimental.
+//                       //                          default: false
+//   offset = X,         // generate hexdump based on X byte offset
+//                       // into the provided source
+//                       //                          default 0
+//   length = Y,         // process Y bytes of the provide source 
+//                       // starting at `offset`. -1 for all
+//                       //                          default -1
+//   displayOffset = Z, // add Z to the address prepended to each line
+//                        // (note, even if `offset` is provided, addressing
+//                        // is started at 0)
+//                        //                          default 0
+// };
+// 
+// console.log(hexy.hexy(buffer, config));
 //
-//console.log(hexy.hexy(buffer, format))
-//``` 
 // In case you're really nerdy, you'll have noticed that the defaults correspond
 // to how `xxd` formats its output.
 //            
@@ -183,12 +178,16 @@
 // 
 // ## History
 // 
-// This is a fairly straightforward port of `hexy.rb` which does more or less the
-// same thing. You can find it here: 
+// This started a fairly straightforward port of `hexy.rb` which does more or less the same thing. You can find it here:
 //  
 //     http://github.com/a2800276/hexy
 //  
-// in case these sorts of things interest you.
+//
+// ### 0.4.0 (updating the minor version: the API changes, see below)
+//
+// * the init parameters no longer contain strings: all params are scalar-defined
+// * names of parameters have been changed to be more consistent
+// * defaults to single-byte grouping
 //
 // ### 0.3.4
 //
@@ -225,15 +224,9 @@
 //
 // * adds typescript support. Thanks Abdulaziz!
 // * remove support for old node versions (0.6-0.12)
-// 
-// ## Mail
-// 
-// In case you discover bugs, spelling errors, offer suggestions for
-// improvements or would like to help out with the project, you can contact
-// me directly (tim@kuriositaet.de). 
+
 
 (function (arg) {
-
 var hexy = function(buffer, config) {
   const h = new Hexy(buffer, config)
   return h.toString()
@@ -245,45 +238,39 @@ var Hexy = function(buffer, config) {
 
   // if we have a Buffer class, convert
   if (typeof Buffer !== 'undefined') {
-    buffer = (Buffer.isBuffer(buffer) && buffer) 
+    buffer = (Buffer.isBuffer(buffer) && buffer)
       || (typeof buffer === 'string' && Buffer.from(buffer)) 
       || (buffer && (buffer.constructor === Array) && Buffer.from(buffer)) // accept num arrays
+      || (buffer instanceof Uint8Array && new TextDecoder().decode(buffer))
       || Buffer.alloc(0)
   }
   buffer = buffer || []
   config = config || {}
- 
-  self.buffer         = buffer // magic string conversion here?
-  self.bytes_per_line = parseInt(config.width) || 16 // formerly `width`
-  self.numbering      = config.numbering == "none" ? "none" : "hex_bytes"
 
-  self.bytes_per_group = 2  // by default (not handled below) "fours" will fold into `bytes_per_group == 2`
-  switch (config.format) {
-    case "none":
-      self.bytes_per_group = 0 // one byte per group, but no delimiters
-      break
-    case "twos":
-      self.bytes_per_group = 1
-      break
-    case "eights":
-      self.bytes_per_group = 4
-      break
-    case "sixteens":
-      self.bytes_per_group = 8
-      break
-  }
-                                                                                                   
+  this.buffer         = buffer // magic string conversion here?
+
+  self.bytesPerLine   = 'bytesPerLine' in config ? parseInt(config.bytesPerLine) : 16
+  self.bytesPerGroup  = 'bytesPerGroup' in config ? parseInt(config.bytesPerGroup) : 1
+  self.showAddress    = 'showAddress' in config ? config.showAddress : true
   self.littleEndian   = config.littleEndian   || false
   self.radix          = config.radix          || 16
   self.caps           = config.caps           == "upper" ? "upper" : "lower"
   self.annotate       = config.annotate       == "none"  ? "none"  : "ascii"
   self.prefix         = config.prefix         || ""
   self.indent         = config.indent         || 0
-  self.html           = config.html           || false
   self.offset         = config.offset         || 0
+  self.displayOffset  = config.displayOffset  || 0
   self.length         = config.length         || -1
   self.extendedChs    = config.extendedChs    || false
-  self.display_offset = config.display_offset || 0
+  self.html           = config.html           || false
+
+  if (isNaN(self.bytesPerLine) || self.bytesPerLine < 1 || self.bytesPerLine > 256) {
+    self.bytesPerLine = 16
+  }
+
+  if (![0, 1, 2, 4, 8].includes(self.bytesPerGroup)) {
+    self.bytesPerGroup = 1
+  }
 
   if (self.offset) {
     if (self.offset < self.buffer.length) {
@@ -299,33 +286,33 @@ var Hexy = function(buffer, config) {
 
   self.prefix = (self.html ? "&nbsp;" : " ").repeat(self.indent) + self.prefix
 
-  self.hex_line_length = (maxnumberlen(self.bytes_per_group, self.radix)) * self.bytes_per_line
-                        / Math.max(self.bytes_per_group, 1)
-  switch (self.bytes_per_group) { // the original code (now documented in the tests),
+  self.hex_line_length = (maxnumberlen(self.bytesPerGroup, self.radix)) * self.bytesPerLine
+                        / Math.max(self.bytesPerGroup, 1)
+  switch (self.bytesPerGroup) {   // the original code (now documented in the tests),
       case 8:                     // some modes had mode-dependent number of extra spaces at the end of the line
       case 4:
       case 2:
-        self.hex_line_length += Math.floor(self.bytes_per_line / self.bytes_per_group)
+        self.hex_line_length += Math.floor(self.bytesPerLine / self.bytesPerGroup)
         break
       case 1:
-        self.hex_line_length += self.bytes_per_line + 3
+        self.hex_line_length += self.bytesPerLine + 3
         break
       case 0:
         self.hex_line_length += 2
         break
   }
-  self.bytes_per_group = Math.min(self.bytes_per_group, self.bytes_per_line)
+  self.bytesPerGroup = Math.min(self.bytesPerGroup, self.bytesPerLine)
 
   this.toString = function() {
     var str = ""
-    var addr = self.offset + self.display_offset
+    var addr = self.offset + self.displayOffset
     var odd = false
 
     if (self.html) { str += "<div class='hexy'>\n" }
 
     // each `slice` is a single output line:
-    for (var start = 0; start < self.buffer.length; start += self.bytes_per_line) {
-      const end = Math.min(start + self.bytes_per_line, self.buffer.length)
+    for (var start = 0; start < self.buffer.length; start += self.bytesPerLine) {
+      const end = Math.min(start + self.bytesPerLine, self.buffer.length)
       const slice = self.buffer.slice(start, end)
 
       if (self.html) {
@@ -335,12 +322,12 @@ var Hexy = function(buffer, config) {
       str += self.prefix
 
       // the address column:
-      if (self.numbering === "hex_bytes") {
+      if (self.showAddress) {
         str += num2str(addr, MAX_ADDRESS_LENGTH, 16) + ": "
       }
 
       // the binary representation column:
-      str += hex(slice, self.bytes_per_line, self.bytes_per_group, self.radix, self.littleEndian)
+      str += hex(slice, self.bytesPerLine, self.bytesPerGroup, self.radix, self.littleEndian)
 
       // the text representation column:
       if (self.annotate === "ascii") {
@@ -358,7 +345,7 @@ var Hexy = function(buffer, config) {
         str += " " + (self.html ? html_escape(text) : ascii_escape(text))
       }
       str += self.html ? "</div>\n" : "\n"
-      addr += self.bytes_per_line
+      addr += self.bytesPerLine
     }
 
     if (self.html) { str += "</div>\n" }
@@ -366,28 +353,28 @@ var Hexy = function(buffer, config) {
   }
 
   // renders the binary representation of individual line
-  var hex = function(buffer, bytes_per_line, bytes_per_group, radix, littleEndian) {
+  var hex = function(buffer, bytesPerLine, bytesPerGroup, radix, littleEndian) {
     var str = ""
-    const delimiter = bytes_per_group == 0 ? "" : " "
-    var group_len = maxnumberlen(bytes_per_group, radix)  // this changes for the very last group in the file
-    const padlen = (bytes_per_line - buffer.length) * (bytes_per_group == 0 ? group_len: (group_len + 1) / bytes_per_group)
-    if (bytes_per_group == 0) {
-      bytes_per_group = 1
+    const delimiter = bytesPerGroup == 0 ? "" : " "
+    var group_len = maxnumberlen(bytesPerGroup, radix)  // this changes for the very last group in the file
+    const padlen = (bytesPerLine - buffer.length) * (bytesPerGroup == 0 ? group_len: (group_len + 1) / bytesPerGroup)
+    if (bytesPerGroup == 0) {
+      bytesPerGroup = 1
     }
-    const start = littleEndian ? bytes_per_group - 1 : 0
-    const end   = littleEndian ? -1 : bytes_per_group
+    const start = littleEndian ? bytesPerGroup - 1 : 0
+    const end   = littleEndian ? -1 : bytesPerGroup
     const step  = littleEndian ? -1 : 1
-    for (var group = 0; group < buffer.length / bytes_per_group; ++group) {
-      var val = bytes_per_group < 4 ? 0 : BigInt(0)
+    for (var group = 0; group < buffer.length / bytesPerGroup; ++group) {
+      var val = bytesPerGroup < 4 ? 0 : BigInt(0)
       for (var ii = start; ii != end; ii += step) {
-        const i = group * bytes_per_group + ii
+        const i = group * bytesPerGroup + ii
         if (i >= buffer.length) { // dangling bytes
           if (radix == 2 || radix == 16) {
             group_len -= maxnumberlen(1, radix)
           } // for decimal and octal representation, the length of binary column is difficult to predict
           continue
         }
-        if (bytes_per_group < 4) {
+        if (bytesPerGroup < 4) {
           val = val * 256 + ((buffer.constructor == String ? buffer.codePointAt(i) : buffer[i]) & 0xff)
         } else {
           val = BigInt(val) * BigInt(256) + BigInt(((buffer.constructor == String ? buffer.codePointAt(i) : buffer[i]) & 0xff))
@@ -403,7 +390,7 @@ var Hexy = function(buffer, config) {
         str = str.toUpperCase()
       }
     }
-    if (buffer.length < bytes_per_line) {
+    if (buffer.length < bytesPerLine) {
       str += (self.html ? "&nbsp;": " ").repeat(padlen)
     }
     str = rpad(str, self.hex_line_length)
@@ -449,7 +436,8 @@ var Hexy = function(buffer, config) {
   }
 }
 
-Hexy.VERSION = "0.3.4"
+Hexy.VERSION = "0.4.0"
+
 
 var maxnumberlen = function(bytes, radix) {
   var result = 2

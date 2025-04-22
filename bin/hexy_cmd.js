@@ -5,17 +5,20 @@ var hexy = require("../hexy.js"),
 
 function usage(mes) {
   console.log(mes || "usage: " + /[^/\\]*$/.exec(process.argv[1]) + " [options] <filename>");
-  console.log("--width     [(16)]                     how many bytes per line")
-  console.log("--numbering [(hex_bytes)|none]         prefix current byte count")
-  console.log("--radix     [2|8|10|(16)]              radix to use")
-  console.log("--format    [sixteens|eights|(fours)|twos|none] how many nibbles per group")
+  console.log("--bytesPerLine  [(16)]                 number of bytes per line")
+  console.log("--bytesPerGroup [0|(1)|2|4|8]          number of bytes per group")
+  console.log("--showAddress                          display address in the left column")
   console.log("--littleEndian                         the data is littleEndian")
+  console.log("--radix         [2|8|10|(16)]          radix to use")
+  console.log("--caps          [(lower)|upper]        case of hex chars")
+  console.log("--annotate      [(ascii)|none]         display ascii annotation in the right column")
+  console.log("--prefix        [(\"\")|<prefix>]      printed in front of each line")
+  console.log("--indent        [(0)|<num>]            number of spaces to indent output")
+  console.log("--offset        (0)                    number of bytes to skip from the start")
+  console.log("--displayOffset (0)                    shift the address values by this")
+  console.log("--length        (-1) mean all          number of bytes to render")
   console.log("--extendedChs                          show more characters as-is")
-  console.log("--caps      [(lower)|upper]            case of hex chars")
   console.log("--html                                 render the output in HTML format")
-  console.log("--annotate  [(ascii)|none]             provide ascii annotation")
-  console.log("--prefix    [(\"\")|<prefix>]          printed in front of each line")
-  console.log("--indent    [(0)|<num>]                number of spaces to indent output")
   console.log("parameters in (parens) are default")
   process.exit(1)
 }
@@ -31,18 +34,22 @@ function existsFatal(fn) {
 }
 
 function handleArgs () {
-  var format = {},
+  var config = {},
       ARGS = [
-      "--width",
-      "--numbering",
-      "--radix",
-      "--format",
+      "--bytesPerLine",
+      "--bytesPerGroup",
+      "--showAddress",
       "--littleEndian",
-      "--extendedChs",
+      "--radix",
       "--caps",
       "--annotate",
       "--prefix",
       "--indent",
+      "--offset",
+      "--displayOffset",
+      "--length",
+      "--extendedChs",
+      "--html"
       ]
 
   var args = process.argv
@@ -67,14 +74,23 @@ function handleArgs () {
     format[arg] = args[++i]
   }
 
-  if (format.width) {
-    format.width = parseInt(format.width, 10)
+  if (format.bytesPerLine) {
+    format.bytesPerLine = parseInt(format.bytesPerLine, 10)
+  }
+  if (format.bytesPerGroup) {
+    format.bytesPerGroup = parseInt(format.bytesPerGroup, 10)
   }
   if (format.indent) {
     format.indent = parseInt(format.indent, 10)
   }
   if (format.radix) {
     format.radix = parseInt(format.radix, 10)
+  }
+  if (format.offset) {
+    format.offset = parseInt(format.offset, 10)
+  }
+  if (format.displayOffset) {
+    format.displayOffset = parseInt(format.displayOffset, 10)
   }
   if (format.html) {
     format.html = true

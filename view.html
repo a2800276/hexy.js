@@ -36,53 +36,207 @@
       margin: 0;
       font-family: monospace;
     }
+    .hex-scroll-outer {
+      position: relative;
+      height: 100%;
+      width: 100%;
+      overflow-y: scroll;
+      font-family: monospace;
+      background: #222;
+      color: #eee;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+    .hex-scroll-spacer {
+      width: 1px;
+    }
+    .hex-viewport {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      min-width: 0;
+      pointer-events: auto;
+      white-space: pre;
+      font-family: inherit;
+      color: inherit;
+      user-select: text;
+      -webkit-user-select: text;
+      -moz-user-select: text;
+      -ms-user-select: text;
+    }
   </style>
-  <script src="hexy.js"></script>
-  <script src="test/testcases.js"></script>
-  <script type="text/javascript">
-    var current_file = null;
+<script src="hexy.js"></script>
+<script type="text/javascript">
+  var current_file = null;
+  var file_array = null;
+  var fmt = null;
+  var lineHeight = 18; // px, must match CSS/JS
+  let selectionAnchorOffset = null;
+  let selectionFocusOffset = null;
 
-    function readFile() {
-      current_file = event.target.files[0];
-      hexdata = document.querySelector(".hexdata");
+  function readFile() {
+    current_file = event.target.files[0];
+    const reader = new FileReader();
+    reader.onload = function() {
+      file_array = new Uint8Array(reader.result);
       update();
-    }
+    };
+    reader.readAsArrayBuffer(current_file);
+  }
 
-    function update() {
-      const fmt = {
-        numbering:    document.getElementById('address').checked ? 'hex_bytes' : 'none',
-        format:       document.querySelector('input[name="format"]:checked').value,
-        littleEndian: document.querySelector('input[name="littleEndian"]:checked').value === 'true',
-        radix:        parseInt(document.querySelector('input[name="radix"]:checked').value),
-        caps:         document.getElementById('caps').checked ? 'upper' : 'lower',
-        html:         document.getElementById('html').checked,
-        extendedChs:  document.getElementById('extendedChs').checked,
-      };
-      console.log(fmt);
-      const reader = new FileReader();
-      reader.onload = function() {
-        const data = reader.result;
-        const array = new Uint8Array(data);
-        hexdata.rows = (array.length + 15) / 16;
-        hexdata.value = hexy(array, fmt);
-      };
-      reader.readAsArrayBuffer(current_file);
-    }
+  function getFormat() {
+    return {
+      bytesPerLine: 16,
+      bytesPerGroup: parseInt(document.querySelector('input[name="format"]:checked').value),
+      showAddress:  document.getElementById('address').checked,
+      littleEndian: document.querySelector('input[name="littleEndian"]:checked').value === 'true',
+      radix:        parseInt(document.querySelector('input[name="radix"]:checked').value),
+      caps:         document.getElementById('caps').checked ? 'upper' : 'lower',
+      html:         false,
+      extendedChs:  document.getElementById('extendedChs').checked,
+    };
+  }
 
-    function pageResized() {
-      const header = document.getElementsByTagName('header')[0];
-      const footer = document.getElementsByTagName('footer')[0];
-      const section = document.getElementsByTagName('section')[0];
-      section.style.height = (window.innerHeight - header.offsetHeight - footer.offsetHeight) + "px";
+  function update() {
+    fmt = getFormat();
+    const outer = document.querySelector(".hex-scroll-outer");
+    const viewport = document.querySelector(".hex-viewport");
+    const spacer = document.querySelector(".hex-scroll-spacer");
+    if (!file_array) {
+      viewport.textContent = "";
+      spacer.style.height = "0px";
+      return;
     }
+    const bytesPerLine = fmt.bytesPerLine || 16;
+    const totalLines = Math.ceil(file_array.length / bytesPerLine);
+    spacer.style.height = (totalLines * lineHeight) + "px";
+    renderVisible();
+  }
 
-    function pageLoaded() {
-      pageResized();
-      const inputs = document.getElementsByTagName('input');
-      for (var ii = 0; ii < inputs.length; ii++) {
-        inputs[ii].addEventListener("change", update);
+  // converts cursor position to address within the viewed file of the cursor position
+  // `hex_pos`: character offset in the hex rendering
+  // return: byte offset in the file
+  function hex2file(hex_pos) {
+    const fmt = getFormat();
+    const blank = Array(fmt.bytesPerLine).fill(" ");
+    const lineLengthInChars = hexy(blank, {
+        ...fmt,
+        displayOffset: 0,
+      }).length;
+
+    const result = {
+      line: Math.floor(hex_pos / lineLengthInChars),
+      x: Math.floor(hex_pos % lineLengthInChars)
+    };
+    return result;
+  }
+
+  function file2hex(file_pos) {
+    const fmt = getFormat();
+    const blank = Array(fmt.bytesPerLine).fill(" ");
+    const lineLengthInChars = hexy(blank, {
+        ...fmt,
+        displayOffset: 0,
+      }).length;
+    return file_pos.line * lineLengthInChars + file_pos.x;
+  }
+
+  var _startLine = 0;   // the line displayed on top of the window
+
+  function saveSelections() {
+    const fmt = getFormat();
+    const viewport = document.querySelector(".hex-viewport");
+    const selection = window.getSelection();
+    const blank = Array(fmt.bytesPerLine).fill(" ");
+    const selections = [];
+    for (var rr = 0; rr < selection.rangeCount; rr++) {
+      const char_selection = selection.getRangeAt(rr);
+      var range = {};
+      range.start = hex2file(char_selection.startOffset);
+      range.start.line += _startLine;
+      range.end = hex2file(char_selection.endOffset);
+      range.end.line += _startLine;
+      selections.push(range);
+    }
+    return selections;
+  }
+
+  function restoreSelections(selections) {
+    const fmt = getFormat();
+    const blank = Array(fmt.bytesPerLine).fill(" ");
+    const lineLengthInChars = hexy(blank, {
+        ...fmt,
+        displayOffset: 0,
+      }).length;
+    const viewport = document.querySelector(".hex-viewport");
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    for (var ss = 0; ss < selections.length; ss++) {
+      try {
+        var selection = selections[ss];
+        const range = document.createRange();
+        selection.start.line -= _startLine;
+        if (selection.start.line < 0) {
+          selection.start.line = 0;
+        }
+        selection.end.line -= _startLine;
+        if (selection.end.line > 0) {
+          range.setStart(viewport.firstChild, file2hex(selection.start));
+          range.setEnd(viewport.firstChild, file2hex(selection.end));
+          sel.addRange(range);
+        }
+      } catch (e) {
+        console.error(e);
       }
     }
+  }
+
+  function renderVisible() {
+    if (!file_array) return;
+    const outer = document.querySelector(".hex-scroll-outer");
+    const viewport = document.querySelector(".hex-viewport");
+    const bytesPerLine = fmt.bytesPerLine || 16;
+    const totalLines = Math.ceil(file_array.length / bytesPerLine);
+    const scrollTop = outer.scrollTop;
+    const containerHeight = outer.clientHeight;
+    const startLine = Math.floor(scrollTop / lineHeight);
+    const linesPerPage = Math.ceil(containerHeight / lineHeight) + 2;
+    const endLine = Math.min(_startLine + linesPerPage, totalLines);
+
+    const selections = saveSelections();
+
+    _startLine = startLine;
+
+    let out = "";
+    for (let line = _startLine; line < endLine; ++line) {
+      const start = line * bytesPerLine;
+      const end = Math.min(start + bytesPerLine, file_array.length);
+      const slice = file_array.slice(start, end);
+      out += hexy(slice, {
+        ...fmt,
+        displayOffset: (fmt.displayOffset || 0) + start,
+      });
+    }
+    viewport.textContent = out;
+    viewport.style.top = (_startLine * lineHeight) + "px";
+
+    restoreSelections(selections);
+  }
+
+  function pageResized() {
+    update();
+  }
+
+  function pageLoaded() {
+    pageResized();
+    const inputs = document.getElementsByTagName('input');
+    for (var ii = 0; ii < inputs.length; ii++) {
+      inputs[ii].addEventListener("change", update);
+    }
+    document.querySelector(".hex-scroll-outer").addEventListener("scroll", renderVisible);
+    window.addEventListener("resize", pageResized);
+  }
 </script>
 </head>
 
@@ -97,15 +251,15 @@
 
     <fieldset class='box'>
       <legend>bytes in group</legend>
-      <div class='bytesingroup'>
-        <input type='radio' id='twos' name='format' value='twos' checked>
-        <label for='twos'>1</label><br>
-        <input type='radio' id='fours' name='format' value='fours'>
-        <label for='fours'>2</label><br>
-        <input type='radio' id='eights' name='format' value='eights'>
-        <label for='eights'>4</label><br>
-        <input type='radio' id='sixteens' name='format' value='sixteens'>
-        <label for='sixteens'>8</label><br>
+      <div class='bytesPerGroup'>
+        <input type='radio' id='bpg_1' name='format' value='1' checked>
+        <label for='pbg_1'>1</label><br>
+        <input type='radio' id='bpg_2' name='format' value='2'>
+        <label for='bpg_2'>2</label><br>
+        <input type='radio' id='bpg_4' name='format' value='4'>
+        <label for='pbg_4'>4</label><br>
+        <input type='radio' id='bpg_8' name='format' value='8'>
+        <label for='bpg_8'>8</label><br>
       </div>
     </fieldset>
 
@@ -151,8 +305,11 @@
     </fieldset>
   </header>
 
-  <section>
-    <textarea cols='80' class='hexdata' spellcheck='false'></textarea>
+  <section style="height:calc(100vh - 120px);">
+    <div class="hex-scroll-outer">
+      <div class="hex-scroll-spacer"></div>
+      <div class="hex-viewport"></div>
+    </div>
   </section>
 
   <footer>

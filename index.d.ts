@@ -1,20 +1,20 @@
 
 declare module "hexy" {
   type FormatOptions = {
-    width?: number;
+    bytesPerLine?: number,
+    bytesPerGroup?: number;
+    showAddress?: boolean;
     littleEndian?: boolean;
     radix?: number;
-    numbering?: "hex_bytes" | "none";
-    format?: "eights" | "fours" | "twos" | "none";
     caps?: "lower" | "upper";
     annotate?: "ascii" | "none";
     prefix?: string;
     indent?: number;
-    html?: boolean;
-    extendedChs?: boolean;
     offset?: number;
+    displayOffset?: number;
     length?: number;
-    display_offset?: number;
+    extendedChs?: boolean;
+    html?: boolean;
   }
   export const hexy: (arg: Buffer | string | number[], format?: FormatOptions) => string;
   export const maxnumberlen: (bytes: number, radix: number) => number;
