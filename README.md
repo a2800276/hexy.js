@@ -53,34 +53,42 @@ Formatting options are configured by passing a `config` object to the `hexy` fun
 ```javascript
 var config: {
     bytesPerLine = 8,   // how many bytes per line, default 16
-    bytesPerGroup = 2,  // how many bytes per group, default 1 (changed in 0.4.0, previously 2)
+    bytesPerGroup = 2,  // [0, 1, 2, 4, 8], number of bytes per group
+                        // 0 = no delimiters, default 1 (changed in 0.4.0, previously 2)
     showAddress = true, // show address column on the left, default true
     radix = b,          // [2, 8, 10, 16], the radix for numeral representation
-                        // for the right column,    default 16
-    littleEndian = true,// endiannes of data,       default false
-                        // counts when number of nibbles is more than "twos",
-                        // i.e. displaying groups bigger than one byte
+                        // for the right column, default 16
+    littleEndian = true,// endianness of data, default false
+                        // applies when bytesPerGroup > 1
     extendedChs = true, // allow displaying more characters in the text column
-                        //                          default false
-    caps = "lower",     // ["lower"|"upper"],       default lower
-    annotate = "ascii", // ["ascii"|"unicode"|"none"], the representation of the text column
-                        //                          default "ascii"
+                        // default false
+    caps = "lower",     // ["lower"|"upper"], default lower
+    annotate = "ascii", // ["ascii"|"none"], ascii annotation at end of line?
+                        // default "ascii"
     prefix = p,         // <string> something pretty to put in front of each line
-                        //                          default ""
+                        // default ""
     indent = i,         // <num> number of spaces to indent every output line
-                        //                          default 0
+                        // default 0
     html = true,        // funky html divs 'n stuff! experimental.
-                        //                          default: false
+                        // default: false
     offset = X,         // generate hexdump based on X byte offset
                         // into the provided source
-                        //                          default 0
+                        // default 0
     length = Y,         // process Y bytes of the provide source 
                         // starting at `offset`. -1 for all
-                        //                          default -1
+                        // default -1
     displayOffset = Z,  // add Z to the address prepended to each line
                         // (note, even if `offset` is provided, addressing
                         // is started at 0)
-                        //                          default 0
+                        // default 0
+    
+    // DEPRECATED (but still supported for backward compatibility):
+    width = n,          // deprecated, use bytesPerLine instead
+    format = f,         // deprecated, use bytesPerGroup instead
+                        // ["none"|"twos"|"fours"|"eights"|"sixteens"]
+    numbering = n,      // deprecated, use showAddress instead
+                        // ["hex_bytes"|"none"]
+    display_offset = Z, // deprecated, use displayOffset instead
 };
 
 console.log(hexy.hexy(buffer, config));
@@ -141,6 +149,7 @@ Deno support would also be nice.
 * Koen Houtman (https://github.com/automagisch)
 * Stef Levesque (https://github.com/stef-levesque)
 * Abdulaziz Ghuloum (https://github.com/azizghuloum)
+* rom-p (https://github.com/rom-p) for fixing issue #24
 
 # History
  
@@ -150,6 +159,7 @@ This started a fairly straightforward port of `hexy.rb` which does more or less 
   
 ### 0.4.0 (updating the minor version: the API changes, see below)
 * the init parameters no longer contain strings: all params are scalar-defined
+* names of parameters have been changed to be more consistent
 * defaults to single-byte grouping
 
 ### 0.3.4

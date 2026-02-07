@@ -61,35 +61,43 @@
 // Formatting options are configured by passing a `config` object to the `hexy` function:
 // 
 // var config: {
-//   width = width,      // how many bytes per line, default 16
+//   bytesPerLine = n,   // how many bytes per line, default 16
+//   bytesPerGroup = g,  // [0, 1, 2, 4, 8], number of bytes per group
+//                       // 0 = no delimiters, default 1
+//   showAddress = true, // show address at start of line, default true
 //   radix = b,          // [2, 8, 10, 16], the radix for numeral representation
-//                       // for the right column,    default 16
-//   format = f,         // ["twos"|"fours"|"eights"|"sixteens"|"none"], number of nibbles per group
-//                       //                          default "fours"
-//   littleEndian = true,// endiannes of data,       default false
-//                       // counts when number of nibbles is more than "twos",
-//                       // i.e. displaying groups bigger than one byte
+//                       // for the right column, default 16
+//   littleEndian = true,// endianness of data, default false
+//                       // applies when bytesPerGroup > 1
 //   extendedChs = true, // allow displaying more characters in the text column
-//                       //                          default false
-//   caps = c,           // ["lower"|"upper"],       default lower
+//                       // default false
+//   caps = c,           // ["lower"|"upper"], default lower
 //   annotate = a,       // ["ascii"|"none"], ascii annotation at end of line?
-//                       //                          default "ascii"
+//                       // default "ascii"
 //   prefix = p,         // <string> something pretty to put in front of each line
-//                       //                          default ""
+//                       // default ""
 //   indent = i,         // <num> number of spaces to indent every output line
-//                       //                          default 0
+//                       // default 0
 //   html = true,        // funky html divs 'n stuff! experimental.
-//                       //                          default: false
+//                       // default: false
 //   offset = X,         // generate hexdump based on X byte offset
 //                       // into the provided source
-//                       //                          default 0
+//                       // default 0
 //   length = Y,         // process Y bytes of the provide source 
 //                       // starting at `offset`. -1 for all
-//                       //                          default -1
-//   displayOffset = Z, // add Z to the address prepended to each line
-//                        // (note, even if `offset` is provided, addressing
-//                        // is started at 0)
-//                        //                          default 0
+//                       // default -1
+//   displayOffset = Z,  // add Z to the address prepended to each line
+//                       // (note, even if `offset` is provided, addressing
+//                       // is started at 0)
+//                       // default 0
+//
+//   // DEPRECATED (but still supported for backward compatibility):
+//   width = n,          // deprecated, use bytesPerLine instead
+//   format = f,         // deprecated, use bytesPerGroup instead
+//                       // ["none"|"twos"|"fours"|"eights"|"sixteens"]
+//   numbering = n,      // deprecated, use showAddress instead
+//                       // ["hex_bytes"|"none"]
+//   display_offset = Z, // deprecated, use displayOffset instead
 // };
 // 
 // console.log(hexy.hexy(buffer, config));
@@ -175,6 +183,7 @@
 // * Koen Houtman (https://github.com/automagisch)
 // * Stef Levesque (https://github.com/stef-levesque)
 // * Abdulaziz Ghuloum (https://github.com/azizghuloum)
+// * rom-p (https://github.com/rom-p) for fixing issue #24
 // 
 // ## History
 // 
@@ -246,6 +255,28 @@ var Hexy = function(buffer, config) {
   }
   buffer = buffer || []
   config = config || {}
+
+  // Backward compatibility: map old parameter names to new ones
+  if ('width' in config && !('bytesPerLine' in config)) {
+    config.bytesPerLine = config.width
+  }
+  if ('numbering' in config && !('showAddress' in config)) {
+    config.showAddress = config.numbering !== "none"
+  }
+  if ('format' in config && !('bytesPerGroup' in config)) {
+    // Map old string-based format to numeric bytesPerGroup
+    const formatMap = {
+      "none": 0,
+      "twos": 1,
+      "fours": 2,
+      "eights": 4,
+      "sixteens": 8
+    }
+    config.bytesPerGroup = formatMap[config.format] !== undefined ? formatMap[config.format] : 1
+  }
+  if ('display_offset' in config && !('displayOffset' in config)) {
+    config.displayOffset = config.display_offset
+  }
 
   this.buffer         = buffer // magic string conversion here?
 
