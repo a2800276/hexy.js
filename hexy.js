@@ -272,7 +272,7 @@ var Hexy = function(buffer, config) {
       "eights": 4,
       "sixteens": 8
     }
-    config.bytesPerGroup = formatMap[config.format] !== undefined ? formatMap[config.format] : 1
+    config.bytesPerGroup = formatMap[config.format] !== undefined ? formatMap[config.format] : 2
   }
   if ('display_offset' in config && !('displayOffset' in config)) {
     config.displayOffset = config.display_offset
@@ -281,7 +281,7 @@ var Hexy = function(buffer, config) {
   this.buffer         = buffer // magic string conversion here?
 
   self.bytesPerLine   = 'bytesPerLine' in config ? parseInt(config.bytesPerLine) : 16
-  self.bytesPerGroup  = 'bytesPerGroup' in config ? parseInt(config.bytesPerGroup) : 1
+  self.bytesPerGroup  = 'bytesPerGroup' in config ? parseInt(config.bytesPerGroup) : 2
   self.showAddress    = 'showAddress' in config ? config.showAddress : true
   self.littleEndian   = config.littleEndian   || false
   self.radix          = config.radix          || 16
