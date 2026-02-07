@@ -75,8 +75,28 @@
       color: blue;
     }
   </style>
-  <script src="hexy.js"></script>
-  <script src="test/testcases.js"></script>
+  <script type="module">
+    import { hexy } from './hexy.js';
+    import testcases from './test/testcases.js';
+    
+    window.hexy = hexy;
+    window.testcases = testcases;
+  </script>
+  <script>
+    // Show helpful message if modules fail to load (e.g., file:// protocol)
+    setTimeout(function() {
+      if (typeof hexy === 'undefined' || typeof testcases === 'undefined') {
+        const totals = document.querySelector("#totals");
+        totals.innerHTML = '<div style="color: #ff6b6b; padding: 2em; font-family: sans-serif;">' +
+          '<h2>⚠️ Cannot Load ES Modules</h2>' +
+          '<p>This page requires serving from a web server (ES modules don\'t work with file:// protocol due to CORS).</p>' +
+          '<p><strong>Quick start:</strong></p>' +
+          '<pre style="background: #2d2d2d; color: #f8f8f2; padding: 1em; border-radius: 4px; display: inline-block;">python3 -m http.server 8000</pre>' +
+          '<p>Then open: <code>http://localhost:8000/test.html</code></p>' +
+          '</div>';
+      }
+    }, 100);
+  </script>
   <script type="text/javascript">
     var test_root = null;
     var template_node;
@@ -152,16 +172,16 @@
           for (var ii = 0; ii < testcases[tc].inputs.length; ii++) {
             testcase_id = [tc, ii];
             check(testcases[tc].inputs[ii],
-                  testcases[tc].params,
+                  testcases[tc].config,
                   testcases[tc].result,
-                  hexy(testcases[tc].inputs[ii], testcases[tc].params));
+                  hexy(testcases[tc].inputs[ii], testcases[tc].config));
           }
         } else {
           testcase_id = tc;
           check(testcases[tc].input,
-                testcases[tc].params,
+                testcases[tc].config,
                 testcases[tc].result,
-                hexy(testcases[tc].input, testcases[tc].params));
+                hexy(testcases[tc].input, testcases[tc].config));
         }
       }
       totals_root.innerHTML = "Executed: " + executed + ", Failed: " + failed;

@@ -129,7 +129,7 @@ const testcases = [
   // Number arrays with bytes work, arrays containing values larger that 0xff are truncated ( val & 0xff )
   { input: arr, config: { bytesPerGroup: 2}, result: arr_e },
    // non numerical bytesPerLine
-  { input: arr, config: { bytesPerLine: "something" }, result: "00000000: 01 02 03 0f                                        ....\n" },
+  { input: arr, config: { bytesPerLine: "something" }, result: "00000000: 0102 030f                                ....\n" },
   { input: arr, config: { bytesPerLine: 2, bytesPerGroup: 2 }, result: "00000000: 0102  ..\n00000002: 030f  ..\n" },
   { input: arr, config: { bytesPerGroup: 2, bytesPerLine: 1 }, result: "00000000: 01  .\n00000001: 02  .\n00000002: 03  .\n00000003: 0f  .\n" },
   // endianness
@@ -147,20 +147,20 @@ const testcases = [
   { input: "", config: {}, result: "" },
   { input: undefined, config: {}, result: "" },
   { input: [0x41], config: { bytesPerGroup: 2 }, result: "00000000: 41                                       A\n" },
-  { input: "A", config: {}, result: "00000000: 41                                                 A\n" },
+  { input: "A", config: {}, result: "00000000: 41                                       A\n" },
   { input: "😀", config: { bytesPerGroup: 2 }, result: "00000000: f09f 9880                                ....\n" },
   { input: "-\u{1d11e}+" /*𝄞*/, config: { bytesPerGroup: 1 }, result: "00000000: 2d f0 9d 84 9e 2b                                  -....+\n" },
   { input: new Uint8Array([0x41, 0x42, 0x43]), config: { bytesPerGroup: 2 }, result: "00000000: 4142 43                                  ABC\n" },
   { input: [0x123, 0x456], config: { bytesPerGroup: 2 }, result: "00000000: 2356                                     #V\n" },
   { input: [-1, 0, 255], config: { bytesPerGroup: 2 }, result: "00000000: ff00 ff                                  ...\n" },
 // #40
-  { input: [1,2,3], config: { offset: 10 }, result: "0000000a: 01 02 03                                           ...\n" },
+  { input: [1,2,3], config: { offset: 10 }, result: "0000000a: 0102 03                                  ...\n" },
   { input: [1,2,3], config: { bytesPerGroup: 2, length: 10 }, result: "00000000: 0102 03                                  ...\n" },
   { input: [1,2,3], config: { bytesPerGroup: 2, offset: -1 }, result: "000000-1: 03                                       .\n" },
   { input: [1,2,3], config: { bytesPerGroup: 2, length: -5 }, result: "" },
   { input: "<>&'\"", config: { bytesPerGroup: 2, html: true, extendedChs: true }, result: "<div class='hexy'>\n<div class='00000000 even'>00000000: 3c3e 2627 22 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;&gt;&amp;&apos;&quot;</div>\n</div>\n" },
   { input: [0x61, 0x62, 0x63], config: { radix: 8, caps: "upper", showAddress: false, bytesPerGroup: 1, html: false, prefix: ">", indent: 2 }, result: "  >141 142 143                                                        abc\n" },
-  { input: [0x61, 0x62], config: { prefix: 123, indent: 3 }, result: "   12300000000: 61 62                                              ab\n" },
+  { input: [0x61, 0x62], config: { prefix: 123, indent: 3 }, result: "   12300000000: 6162                                     ab\n" },
   { input: new ArrayBuffer(4), config: {}, result: "" },
   { input: [ 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0xd2, 0x77, 0x6f, 0x72, 0x6c, 0x64 ], config: { bytesPerGroup: 1 }, result: "00000000: 68 65 6c 6c 6f d2 77 6f 72 6c 64                   hello.world\n" },
   { input: [ 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0xd2, 0x77, 0x6f, 0x72, 0x6c, 0x64 ], config: { bytesPerGroup: 1, extendedChs: true }, result: "00000000: 68 65 6c 6c 6f d2 77 6f 72 6c 64                   hello" + "\u00d2" + "world\n" },
@@ -198,6 +198,5 @@ const testcases = [
   { input: "abc", config: { radix: 2, bytesPerGroup: 2 }, result: "00000000: 0110000101100010 01100011                                                                                                                abc\n" },
 
 ];
-if (typeof window === 'undefined') {
-  module.exports = testcases;
-}
+
+export default testcases;

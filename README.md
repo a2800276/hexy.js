@@ -3,22 +3,73 @@
 hexy.js -- utility to create hex dumps
 
 # Usage
-`hexy` is an easy to use javascript library to create hex dumps. It works just as well in node as in your browser. It contains a number of options to configure how the hex dump will end up looking.
+
+`hexy` is an easy to use javascript library to create hex dumps. It works just
+as well in Node.js, Deno, and browsers. It contains a number of options to
+configure how the hex dump will end up looking.
 
 It creates a pleasant looking hex dump by default:
-```javascript     
-var hexy = require('hexy'),
-    b = Buffer.from("\000\001\003\005\037\012\011bcdefghijklmnopqrstuvwxyz0123456789")
-        // or String or Array containing numbers ( bytes, i.e. < 0xFF )
 
+```javascript
+import { hexy } from 'hexy'
+
+const b = Buffer.from("\000\001\003\005\037\012\011bcdefghijklmnopqrstuvwxyz0123456789")
+    // or String or Array containing numbers ( bytes, i.e. < 0xFF )
+
+console.log(hexy(b))
+```
+
+CommonJS still works in modern Node.js via ESM interop:
+
+```javascript
+const hexy = require('hexy')
 console.log(hexy.hexy(b))
- ```
+```
 
 results in this dump:
 
      00000000: 0001 0305 1f0a 0962 6364 6566 6768 696a  .......bcdefghij
      00000010: 6b6c 6d6e 6f70 7172 7374 7576 7778 797a  klmnopqrstuvwxyz
      00000020: 3031 3233 3435 3637 3839                 0123456789
+
+## Deno
+
+`hexy` works natively in Deno using ES modules:
+
+```typescript
+import { hexy } from './hexy.js'
+
+const data = new Uint8Array([0, 1, 3, 5, 31, 10, 9, 98, 99, 100])
+console.log(hexy(data))
+```
+
+yields:
+
+    00000000: 0001 0305 1f0a 0962 6364                 .......bcd
+
+---
+
+## Browser Usage
+
+For browsers, include as an ES module:
+
+```html
+<script type="module">
+  import { hexy } from './hexy.js';
+  console.log(hexy([1, 2, 3]));
+</script>
+```
+
+**Note:** The HTML demo files (`view.html`, `test.html`) require serving from a
+web server due to ES module CORS restrictions. They won't work when opened
+directly as `file://` URLs. Quick start:
+
+```bash
+python3 -m http.server 8000
+# Then open http://localhost:8000/view.html
+```
+
+## Configuration
 
 you can configure:
 * Line width
@@ -35,17 +86,20 @@ you can configure:
      0000020: 3031 3233 3435 3637  0123 4567 
      0000028: 3839                 89
 
-or even:
+or, if you want to get crazy, even:
 
      0000000: 00 01 03 05 1f 0a 09 62   63 64 65 66 67 68 69 6a 
      0000010: 6b 6c 6d 6e 6f 70 71 72   73 74 75 76 77 78 79 7a 
      0000020: 30 31 32 33 34 35 36 37   38 39
 
 ## Accepted Input
+
 The input should be one of the following:
+
 * a `Buffer`
 * a `String`
-* an `Array` containing `Number`s. These should fit into 8 bits, i.e. be smaller than 255. Larger values are truncated (specifically `val & 0xff`)
+* an `Array` containing `Number`s. These should fit into 8 bits, i.e. be
+  smaller than 255. Larger values are truncated (specifically `val & 0xff`)
  
 ## Formatting Options
 Formatting options are configured by passing a `config` object to the `hexy` function:
@@ -93,51 +147,48 @@ var config: {
 
 console.log(hexy.hexy(buffer, config));
 ``` 
- In case you're really nerdy, you'll have noticed that the defaults correspond to how `xxd` formats its output.
+
+In case you're really nerdy, you'll have noticed that the defaults correspond
+to how `xxd` formats its output.
  
 ## Installing
  
-Either use `npm` (or whatever compatible npm thingie people are using these days):
+Either use `npm` (or whatever compatible npm thingie people are using these
+days):
+
 ```shell   
 $ npm install hexy
 ```
 
-This will install the lib which you'll be able to use like so:
-```javascript     
-var hexy = require("hexy"),
-    buf  = // get Buffer from somewhere,
-    str  = hexy.hexy(buf)
-```
-
-It will also install `hexy` into your path in case you're totally fed up with using `xxd`.
+It will also install `hexy` into your path in case you're totally fed up with
+using `xxd`.
 
 If you don't like `npm`, grab the source from github:
  
     http://github.com/a2800276/hexy.js
  
-## Typescript
-
-```typescript
-import {hexy} from "hexy";
-const buff = ...
-console.log(hexy(buff));
-```
 
 ## Browser Support
-Browser support is fixed (now supports `Array` and `Uint8Array`) in 0.3.3. Please refer to `test.html` for examples.
+
+Browser support is fixed (now supports `Array` and `Uint8Array`) in 0.3.3.
+Please refer to `test.html` for examples. Note that because of the use of ES
+module import syntax, hexy.js requires a modern browser (2018-2020+), the
+script tag requires a `type="module"` attribute, and the test files must be
+served from a web server.
+
+```bash
  
 # TODOS
 
-The current version only pretty prints node.js Buffers, and JS Strings
- and Arrays. This should be expanded to also do typed arrays,
- Streams/series of Buffers which would be nice so you don't have to
- collect the whole things you want to pretty print in memory, and such.
+The current version only pretty prints node.js Buffers, and JS Strings and
+(typed) Arrays. This should be expanded to also do Streams/series of Buffers
+which would be nice so you don't have to collect the whole things you want to
+pretty print in memory, and such.
  
 I'd like to improve html rendering, e.g. to be able to mouse over the
- ascii annotation and highlight the hex byte and vice versa, improve
- browser integration and set up a proper build & packaging system.
+ascii annotation and highlight the hex byte and vice versa, improve
+browser integration and set up a proper build & packaging system.
 
-Deno support would also be nice.
   
 # Thanks
  
@@ -149,7 +200,7 @@ Deno support would also be nice.
 * Koen Houtman (https://github.com/automagisch)
 * Stef Levesque (https://github.com/stef-levesque)
 * Abdulaziz Ghuloum (https://github.com/azizghuloum)
-* rom-p (https://github.com/rom-p) for fixing issue #24
+* rom-p (https://github.com/rom-p) 
 
 # History
  
@@ -160,34 +211,47 @@ This started a fairly straightforward port of `hexy.rb` which does more or less 
 ### 0.4.0 (updating the minor version: the API changes, see below)
 * the init parameters no longer contain strings: all params are scalar-defined
 * names of parameters have been changed to be more consistent
-* defaults to single-byte grouping
 
 ### 0.3.4
 * issue concerning static analysis and BigInt usage
 
 ### 0.3.3
-* introduced the concept of endiannes (googleable and wikiable).  Before this change, the code assumed that the displayed data is big-endian.
-    However, most file formats and most CPU architectures are little-endian.  So, introduced the support for it.
-    The endiannes can be controlled by passing bool via `littleEndian`, which defaults to `false` to support the behavior of the previous versions
-* introduced ability to group 8 bytes (16 nibbles).  With prevalence of 64-bit computing, the 64-bit (i.e. 8-byte) data is getting more and more popular.
-    The 8-byte grouping is enabled by passing "sixteens" into `config.format`
-* introduced ability to display the binary data in bases (radixes) other than hexadecimal: binary, octal, decimal and hexadecimal
-    The radix is controlled by passing 2, 8, 10 or 16 into `config.radix`
-* introduced ability to control if non-printable characters are displayed or replaced with `'.'`.
-    To display extended characters, pass `config.extendedChs: true`. The exact behavior of this flag depends on the output type, html or not:
-    In `config.html: true` mode, all the characters can be displayed, even 0-0x20 have visual represenation.
-    In `config.html: false` mode, only the extended characters beyond the end of standard ASCII are displayed.
-* implemented and exported `maxnumberlen()` -- calculates how many characters can a number occupy given bittness and radix
-* several tweaks improved performance by ~15-30%, depending on the platform (compared to v.0.3.2).
+
+* introduced the concept of endiannes (googleable and wikiable).  Before this
+  change, the code assumed that the displayed data is big-endian. However, most
+  file formats and most CPU architectures are little-endian.  So, introduced
+  the support for it. The endiannes can be controlled by passing bool via
+  `littleEndian`, which defaults to `false` to support the behavior of the
+  previous versions
+* introduced ability to group 8 bytes (16 nibbles).  With prevalence of 64-bit
+  computing, the 64-bit (i.e. 8-byte) data is getting more and more popular.
+  The 8-byte grouping is enabled by passing "sixteens" into `config.format`
+* introduced ability to display the binary data in bases (radixes) other than
+  hexadecimal: binary, octal, decimal and hexadecimal The radix is controlled
+  by passing 2, 8, 10 or 16 into `config.radix`
+* introduced ability to control if non-printable characters are displayed or
+  replaced with `'.'`. To display extended characters, pass
+  `config.extendedChs: true`. The exact behavior of this flag depends on the
+  output type, html or not: In `config.html: true` mode, all the characters can
+  be displayed, even 0-0x20 have visual represenation. In `config.html: false`
+  mode, only the extended characters beyond the end of standard ASCII are
+  displayed.
+* implemented and exported `maxnumberlen()` -- calculates how many characters
+  can a number occupy given bittness and radix
+* several tweaks improved performance by ~15-30%, depending on the platform
+  (compared to v.0.3.2).
 * a bit more order in the node.js tests:
-  * the tests are read from an uniform table.  This allows enumerating the testcases, as well as sharing them with browser tests
+  * the tests are read from an uniform table.  This allows enumerating the
+    testcases, as well as sharing them with browser tests
   * added ability to do performance tests -- just run `time node test perf`
 * enabled browser tests:
   * visual summary with details of all the tests, collapsable and color-coded
   * same set of testcases as in node.js
-  * all tests pass now.  Found and fixed a bug that was present in all browsers where they handle bigger-than-byte data differently compared to node.js
+  * all tests pass now.  Found and fixed a bug that was present in all browsers
+    where they handle bigger-than-byte data differently compared to node.js
 * created a static html page to hex display files (view.html)
-* restricted the set of node.js versions and browsers (now requires support of `BigInt`: Node.JS 10.4+, browsers since 2018-2020)
+* restricted the set of node.js versions and browsers (now requires support of
+  `BigInt`: Node.JS 10.4+, browsers since 2018-2020)
 * the Travis-ci is passing now
 * nits:
   * removed some of unused variables
@@ -206,10 +270,36 @@ This started a fairly straightforward port of `hexy.rb` which does more or less 
 
  * adds typescript support. Thanks Abdulaziz!
  * remove support for old node versions (0.6-0.12)
- 
- ## Mail
- 
- In case you discover bugs, spelling errors, offer suggestions for
- improvements or would like to help out with the project, you can contact
- me directly (tim@kuriositaet.de). 
 
+---
+
+## "Migration Guide" (0.3.x → 0.4.0)
+
+### If you're using the new API (recommended):
+```javascript
+// 0.4.0 - New API
+hexy.hexy(buffer, {
+  bytesPerLine: 16,
+  bytesPerGroup: 2,
+  showAddress: true,
+  displayOffset: 0x1000
+});
+```
+
+### If you want to keep using the old API:
+```javascript
+// Still works in 0.4.0 (backward compatible)
+hexy.hexy(buffer, {
+  width: 16,
+  format: "fours",  // maps to bytesPerGroup: 2
+  numbering: "hex_bytes",  // maps to showAddress: true
+  display_offset: 0x1000  // maps to displayOffset: 0x1000
+});
+```
+
+### String format mapping:
+- `format: "none"` → `bytesPerGroup: 0`
+- `format: "twos"` → `bytesPerGroup: 1`
+- `format: "fours"` → `bytesPerGroup: 2`
+- `format: "eights"` → `bytesPerGroup: 4`
+- `format: "sixteens"` → `bytesPerGroup: 8`

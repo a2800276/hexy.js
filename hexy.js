@@ -235,7 +235,6 @@
 // * remove support for old node versions (0.6-0.12)
 
 
-(function (arg) {
 var hexy = function(buffer, config) {
   const h = new Hexy(buffer, config)
   return h.toString()
@@ -473,6 +472,7 @@ var Hexy = function(buffer, config) {
 Hexy.VERSION = "0.4.0"
 
 
+// Deprecated: maxnumberlen is an internal helper and will be removed in a future release.
 var maxnumberlen = function(bytes, radix) {
   var result = 2
   if (bytes == 0) {
@@ -521,25 +521,13 @@ var maxnumberlen = function(bytes, radix) {
   return result
 }
 
-
-// This is probably not the prettiest or coolest way to to determine runtime
-// environment. It seems to work and I'm not up to the task figuring out what
-// the module system du jour is and how to interface with it ...
-
-// If anyone wants to fix this to include this module "properly", I'm more than
-// happy to incorporate any fixes...
-
-var _exp
-if (typeof exports !== "undefined") {
-  _exp = exports
-} else if (arg === window) {
-  _exp = window
-} else {
-  // who knows?
-  _exp = arg // or this or somethings. ...
+// Browser global scope support (for file:// protocol and legacy usage)
+if (typeof window !== 'undefined') {
+  window.hexy = hexy;
+  window.Hexy = Hexy;
+  window.maxnumberlen = maxnumberlen;
 }
-_exp.hexy = hexy
-_exp.Hexy = Hexy
-_exp.maxnumberlen = maxnumberlen
 
-})(this)
+// ES module exports for Node.js, Deno, and browsers
+export { hexy, Hexy, maxnumberlen }
+export default hexy

@@ -66,7 +66,25 @@
       -ms-user-select: text;
     }
   </style>
-<script src="hexy.js"></script>
+<script type="module">
+  import { hexy } from './hexy.js';
+  window.hexy = hexy;
+</script>
+<script>
+  // Show helpful message if module fails to load (e.g., file:// protocol)
+  setTimeout(function() {
+    if (typeof hexy === 'undefined') {
+      const outer = document.querySelector(".hex-scroll-outer");
+      outer.innerHTML = '<div style="color: #ff6b6b; padding: 2em; text-align: center; font-family: sans-serif;">' +
+        '<h2>⚠️ Cannot Load ES Modules</h2>' +
+        '<p>This page requires serving from a web server (ES modules don\'t work with file:// protocol due to CORS).</p>' +
+        '<p><strong>Quick start:</strong></p>' +
+        '<pre style="background: #2d2d2d; color: #f8f8f2; padding: 1em; border-radius: 4px; display: inline-block;">python3 -m http.server 8000</pre>' +
+        '<p>Then open: <code>http://localhost:8000/view.html</code></p>' +
+        '</div>';
+    }
+  }, 100);
+</script>
 <script type="text/javascript">
   var current_file = null;
   var file_array = null;

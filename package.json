@@ -4,15 +4,34 @@
   "description": "hexdump, binary pretty-printing",
   "author": "Tim Becker <tim.becker@kuriositaet.de>",
   "license": "MIT",
+  "type": "module",
   "main": "./hexy.js",
+  "types": "./index.d.ts",
   "repository": {
     "type": "git",
     "url": "git://github.com/a2800276/hexy.js.git"
   },
+  "keywords": [
+    "hex",
+    "hexdump",
+    "binary",
+    "pretty-print",
+    "debug",
+    "dump",
+    "buffer",
+    "xxd"
+  ],
   "engines": {
-    "node": ">=10.4"
+    "node": ">=14.0.0"
   },
   "browserslist": ["> 1%", "last 4 versions"],
+  "files": [
+    "hexy.js",
+    "index.d.ts",
+    "bin/",
+    "LICENSE",
+    "README.md"
+  ],
   "scripts": {
     "test": "node ./test.js"
   },
@@ -20,6 +39,6 @@
     "hexy": "./bin/hexy_cmd.js"
   },
   "devDependencies": {
-    "@types/node": "14.x"
+    "@types/node": "^22.0.0"
   }
 }

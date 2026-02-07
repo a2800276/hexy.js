@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 
-var hexy = require("../hexy.js"),
-    fs   = require("fs")
+import * as hexyModule from "../hexy.js"
+import fs from "fs"
+
+const hexy = hexyModule
 
 function usage(mes) {
   console.log(mes || "usage: " + /[^/\\]*$/.exec(process.argv[1]) + " [options] <filename>");
@@ -64,40 +66,40 @@ function handleArgs () {
       if (args.length-1 === i) {
         // last arg, could be filename
         existsFatal(arg)
-        format.filename = arg
+        config.filename = arg
         break;
       } else {
         usage()
       }
     }
     arg = arg.substr(2, arg.length)
-    format[arg] = args[++i]
+    config[arg] = args[++i]
   }
 
-  if (format.bytesPerLine) {
-    format.bytesPerLine = parseInt(format.bytesPerLine, 10)
+  if (config.bytesPerLine) {
+    config.bytesPerLine = parseInt(config.bytesPerLine, 10)
   }
-  if (format.bytesPerGroup) {
-    format.bytesPerGroup = parseInt(format.bytesPerGroup, 10)
+  if (config.bytesPerGroup) {
+    config.bytesPerGroup = parseInt(config.bytesPerGroup, 10)
   }
-  if (format.indent) {
-    format.indent = parseInt(format.indent, 10)
+  if (config.indent) {
+    config.indent = parseInt(config.indent, 10)
   }
-  if (format.radix) {
-    format.radix = parseInt(format.radix, 10)
+  if (config.radix) {
+    config.radix = parseInt(config.radix, 10)
   }
-  if (format.offset) {
-    format.offset = parseInt(format.offset, 10)
+  if (config.offset) {
+    config.offset = parseInt(config.offset, 10)
   }
-  if (format.displayOffset) {
-    format.displayOffset = parseInt(format.displayOffset, 10)
+  if (config.displayOffset) {
+    config.displayOffset = parseInt(config.displayOffset, 10)
   }
-  if (format.html) {
-    format.html = true
+  if (config.html) {
+    config.html = true
   }
-  format.littleEndian = format.littleEndian == "true"
-  format.extendedChs = format.extendedChs == "true"
-  return format
+  config.littleEndian = config.littleEndian == "true"
+  config.extendedChs = config.extendedChs == "true"
+  return config
 }
 
 /************************************************************************

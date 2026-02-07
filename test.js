@@ -1,7 +1,9 @@
-const { parseArgs } = require('util');
+import { parseArgs } from 'util';
+import { readFileSync } from 'fs';
+import * as hexyModule from "./hexy.js"
+import testcases from "./test/testcases.js"
 
-var hexy = require("./hexy.js")
-const testcases = require("./test/testcases.js")
+const hexy = hexyModule
 
 var testcase_id = [ 0, 0 ] // some tests have multiple variants (distinguished by the intput).  To make the navigation easier, the tests are numbered as [line.subtest]
 var failed = 0
@@ -71,8 +73,7 @@ if (iterations > 1) {
 }
 
 function checkVersion () {
-  const fs = require("fs") 
-  const pkg = fs.readFileSync("package.json") 
+  const pkg = readFileSync("package.json") 
   const version = JSON.parse(pkg).version
 
   if (version !== hexy.Hexy.VERSION) {
