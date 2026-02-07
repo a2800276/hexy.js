@@ -397,19 +397,22 @@ var Hexy = function(buffer, config) {
     const step  = littleEndian ? -1 : 1
     for (var group = 0; group < buffer.length / bytesPerGroup; ++group) {
       var val = bytesPerGroup < 4 ? 0 : BigInt(0)
+      var bytes_in_group = 0  // count how many bytes we actually have in this group
       for (var ii = start; ii != end; ii += step) {
         const i = group * bytesPerGroup + ii
         if (i >= buffer.length) { // dangling bytes
-          if (radix == 2 || radix == 16) {
-            group_len -= maxnumberlen(1, radix)
-          } // for decimal and octal representation, the length of binary column is difficult to predict
           continue
         }
+        bytes_in_group++
         if (bytesPerGroup < 4) {
           val = val * 256 + ((buffer.constructor == String ? buffer.codePointAt(i) : buffer[i]) & 0xff)
         } else {
           val = BigInt(val) * BigInt(256) + BigInt(((buffer.constructor == String ? buffer.codePointAt(i) : buffer[i]) & 0xff))
         }
+      }
+      // For incomplete groups, adjust group_len based on actual bytes present
+      if (bytes_in_group < bytesPerGroup) {
+        group_len = maxnumberlen(bytes_in_group, radix)
       }
       const text = val.toString(radix)
       for (var c = 0; c < group_len - text.length; c++) {

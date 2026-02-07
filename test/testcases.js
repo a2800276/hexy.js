@@ -167,6 +167,35 @@ const testcases = [
 // #50
   { input: "abc", config: { bytesPerGroup: 2, littleEndian: true }, result: "00000000: 6261 63                                  abc\n" },
   { input: "abc", config: { bytesPerGroup: 4, littleEndian: true }, result: "00000000: 636261                               abc\n" },
+  // Issue #24 - Test case for dangling bytes alignment fix (hex)
+  { input: `{"client_id":"YzEzMGdoMHJnOHBiOG1ibDhyNTA=","response_type":"code","scope":"introscpect_tokens, revoke_tokens","iss":"bjhIRjM1cXpaa21zdWtISnp6ejlMbk44bTlNZjk3dXE=","sub":"YzEzMGdoMHJnOHBiOG1ibDhyNTA=","aud":"https://localhost:8443/{tid}/{aid}/oauth2/authorize","jti":"1516239022","exp":"2021-05-17T07:09:48.000+0545"}`, 
+    config: { bytesPerGroup: 2 }, 
+    result: "00000000: 7b22 636c 6965 6e74 5f69 6422 3a22 597a  {\"client_id\":\"Yz\n" +
+            "00000010: 457a 4d47 646f 4d48 4a6e 4f48 4269 4f47  EzMGdoMHJnOHBiOG\n" +
+            "00000020: 3169 6244 6879 4e54 413d 222c 2272 6573  1ibDhyNTA=\",\"res\n" +
+            "00000030: 706f 6e73 655f 7479 7065 223a 2263 6f64  ponse_type\":\"cod\n" +
+            "00000040: 6522 2c22 7363 6f70 6522 3a22 696e 7472  e\",\"scope\":\"intr\n" +
+            "00000050: 6f73 6370 6563 745f 746f 6b65 6e73 2c20  oscpect_tokens, \n" +
+            "00000060: 7265 766f 6b65 5f74 6f6b 656e 7322 2c22  revoke_tokens\",\"\n" +
+            "00000070: 6973 7322 3a22 626a 6849 526a 4d31 6358  iss\":\"bjhIRjM1cX\n" +
+            "00000080: 7061 6132 317a 6457 7449 536e 7036 656a  paa21zdWtISnp6ej\n" +
+            "00000090: 6c4d 626b 3434 6254 6c4e 5a6a 6b33 6458  lMbk44bTlNZjk3dX\n" +
+            "000000a0: 453d 222c 2273 7562 223a 2259 7a45 7a4d  E=\",\"sub\":\"YzEzM\n" +
+            "000000b0: 4764 6f4d 484a 6e4f 4842 694f 4731 6962  GdoMHJnOHBiOG1ib\n" +
+            "000000c0: 4468 794e 5441 3d22 2c22 6175 6422 3a22  DhyNTA=\",\"aud\":\"\n" +
+            "000000d0: 6874 7470 733a 2f2f 6c6f 6361 6c68 6f73  https://localhos\n" +
+            "000000e0: 743a 3834 3433 2f7b 7469 647d 2f7b 6169  t:8443/{tid}/{ai\n" +
+            "000000f0: 647d 2f6f 6175 7468 322f 6175 7468 6f72  d}/oauth2/author\n" +
+            "00000100: 697a 6522 2c22 6a74 6922 3a22 3135 3136  ize\",\"jti\":\"1516\n" +
+            "00000110: 3233 3930 3232 222c 2265 7870 223a 2232  239022\",\"exp\":\"2\n" +
+            "00000120: 3032 312d 3035 2d31 3754 3037 3a30 393a  021-05-17T07:09:\n" +
+            "00000130: 3438 2e30 3030 2b30 3534 3522 7d         48.000+0545\"}\n" },
+  // Test dangling bytes with octal radix
+  { input: "abc", config: { radix: 8, bytesPerGroup: 2 }, result: "00000000: 060542 143                                               abc\n" },
+  // Test dangling bytes with decimal radix
+  { input: "abc", config: { radix: 10, bytesPerGroup: 2 }, result: "00000000: 024930 099                                               abc\n" },
+  // Test dangling bytes with binary radix
+  { input: "abc", config: { radix: 2, bytesPerGroup: 2 }, result: "00000000: 0110000101100010 01100011                                                                                                                abc\n" },
 
 ];
 if (typeof window === 'undefined') {
